@@ -54,6 +54,7 @@
     #searchBox {
       width: 100%;
       padding: 0.8rem 1rem;
+      padding-right: 2.5rem; /* Make room for clear button */
       border: none;
       border-radius: 0.4rem;
       font-size: 1rem;
@@ -62,6 +63,30 @@
       font-size: 16px; /* Prevents zoom on iOS */
     }
     #searchBox:focus { outline: 2px solid var(--accent); outline-offset: 2px; }
+    .clear-button {
+      position: absolute;
+      right: 0.5rem;
+      top: 50%;
+      transform: translateY(-50%);
+      background: #666;
+      color: var(--fg);
+      border: none;
+      border-radius: 50%;
+      width: 1.5rem;
+      height: 1.5rem;
+      font-size: 0.8rem;
+      cursor: pointer;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      transition: background-color 0.2s;
+    }
+    .clear-button:hover {
+      background: #888;
+    }
+    .clear-button.visible {
+      display: flex;
+    }
     .search-info {
       font-size: 0.8rem;
       color: #888;
@@ -168,6 +193,7 @@
   <div class="search-container">
     <input id="searchBox" type="search" placeholder="Search DVDs…" autocomplete="off" />
     <div class="search-info" id="searchInfo">Type to search both lists</div>
+    <button class="clear-button">✗</button>
   </div>
 
   <div class="list-section" id="wishWrapper">
@@ -245,6 +271,22 @@
     const wishListEl = document.getElementById('wishList');
     const searchBox = document.getElementById('searchBox');
     const searchInfo = document.getElementById('searchInfo');
+    const clearButton = document.querySelector('.clear-button');
+
+    function updateClearButton() {
+      if (searchBox.value.trim()) {
+        clearButton.classList.add('visible');
+      } else {
+        clearButton.classList.remove('visible');
+      }
+    }
+
+    function clearSearch() {
+      searchBox.value = '';
+      searchBox.focus();
+      render();
+      updateClearButton();
+    }
 
     function highlightMatch(text, filter) {
       if (!filter) return text;
@@ -302,7 +344,12 @@
       await loadData();
       render();
 
-      searchBox.addEventListener('input', e => render(e.target.value.trim()));
+      searchBox.addEventListener('input', e => {
+        render(e.target.value.trim());
+        updateClearButton();
+      });
+
+      clearButton.addEventListener('click', clearSearch);
 
       // Check offline status
       checkOfflineStatus();
