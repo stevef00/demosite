@@ -54,7 +54,6 @@
     #searchBox {
       width: 100%;
       padding: 0.8rem 1rem;
-      padding-right: 2.5rem; /* Make room for clear button */
       border: none;
       border-radius: 0.4rem;
       font-size: 1rem;
@@ -63,29 +62,23 @@
       font-size: 16px; /* Prevents zoom on iOS */
     }
     #searchBox:focus { outline: 2px solid var(--accent); outline-offset: 2px; }
-    .clear-button {
-      position: absolute;
-      right: 0.5rem;
-      top: 50%;
-      transform: translateY(-50%);
-      background: #666;
-      color: var(--fg);
+    .clear-search-button {
+      background: var(--accent);
+      color: var(--bg);
       border: none;
-      border-radius: 50%;
-      width: 1.5rem;
-      height: 1.5rem;
+      border-radius: 0.3rem;
+      padding: 0.4rem 0.8rem;
       font-size: 0.8rem;
       cursor: pointer;
+      margin-top: 0.5rem;
       display: none;
-      align-items: center;
-      justify-content: center;
       transition: background-color 0.2s;
     }
-    .clear-button:hover {
-      background: #888;
+    .clear-search-button:hover {
+      background: #0298c4;
     }
-    .clear-button.visible {
-      display: flex;
+    .clear-search-button.visible {
+      display: inline-block;
     }
     .search-info {
       font-size: 0.8rem;
@@ -193,7 +186,7 @@
   <div class="search-container">
     <input id="searchBox" type="search" placeholder="Search DVDs…" autocomplete="off" />
     <div class="search-info" id="searchInfo">Type to search both lists</div>
-    <button class="clear-button">✗</button>
+    <button class="clear-search-button">Clear Search</button>
   </div>
 
   <div class="list-section" id="wishWrapper">
@@ -271,7 +264,7 @@
     const wishListEl = document.getElementById('wishList');
     const searchBox = document.getElementById('searchBox');
     const searchInfo = document.getElementById('searchInfo');
-    const clearButton = document.querySelector('.clear-button');
+    const clearButton = document.querySelector('.clear-search-button');
 
     function updateClearButton() {
       if (searchBox.value.trim()) {
