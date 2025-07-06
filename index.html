@@ -53,6 +53,16 @@
     .list-section h2 { font-size: 1.3rem; margin-bottom: 0.8rem; border-bottom: 1px solid #2a2a2a; padding-bottom: 0.4rem; }
     ul { list-style: none; }
     li { padding: 0.35rem 0; border-bottom: 1px dashed #2a2a2a; word-break: break-word; }
+    footer {
+      margin-top: auto;
+      padding-top: 2rem;
+      text-align: center;
+      color: #888;
+      font-size: 0.9rem;
+    }
+    footer p {
+      margin: 0;
+    }
   </style>
 </head>
 <body>
@@ -69,6 +79,10 @@
     <ul id="wishList"></ul>
   </div>
 
+  <footer id="lastModified">
+    <p>Last modified: <span id="lastModifiedDate">Loading...</span></p>
+  </footer>
+
   <script>
     let data = { owned: [], wishlist: [] };
 
@@ -76,9 +90,24 @@
       try {
         const res = await fetch('dvd_data.json');
         if (!res.ok) throw new Error(res.status);
+
+        // Get the last-modified header
+        const lastModified = res.headers.get('last-modified');
+        if (lastModified) {
+          const date = new Date(lastModified);
+          const lastModifiedDateEl = document.getElementById('lastModifiedDate');
+          lastModifiedDateEl.textContent = date.toLocaleString();
+        } else {
+          // Fallback: try to get the current file's modification time
+          const lastModifiedDateEl = document.getElementById('lastModifiedDate');
+          lastModifiedDateEl.textContent = 'Date not available';
+        }
+
         data = await res.json();
       } catch (err) {
         console.error('Could not load dvd_data.json', err);
+        const lastModifiedDateEl = document.getElementById('lastModifiedDate');
+        lastModifiedDateEl.textContent = 'Error loading data';
       }
     }
 
