@@ -25,6 +25,9 @@
       --bg: #121212;
       --fg: #e0e0e0;
       --accent: #02b3e4;
+      --wishlist: #4caf50;
+      --owned: #ff9800;
+      --error: #f44336;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
     body {
@@ -33,49 +36,147 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 2rem 1rem 4rem;
+      padding: 1rem 0.5rem 2rem;
       min-height: 100vh;
     }
-    h1 { margin-bottom: 1rem; font-size: 2rem; letter-spacing: 0.05em; text-align: center; }
-    #searchBox {
+    h1 {
+      margin-bottom: 0.5rem;
+      font-size: 1.5rem;
+      letter-spacing: 0.05em;
+      text-align: center;
+    }
+    .search-container {
       width: 100%;
       max-width: 30rem;
-      padding: 0.6rem 1rem;
-      margin-bottom: 2rem;
+      margin-bottom: 1rem;
+      position: relative;
+    }
+    #searchBox {
+      width: 100%;
+      padding: 0.8rem 1rem;
       border: none;
       border-radius: 0.4rem;
       font-size: 1rem;
       background: #1e1e1e;
       color: var(--fg);
+      font-size: 16px; /* Prevents zoom on iOS */
     }
     #searchBox:focus { outline: 2px solid var(--accent); outline-offset: 2px; }
-    .list-section { width: 100%; max-width: 40rem; margin-bottom: 2.5rem; }
-    .list-section h2 { font-size: 1.3rem; margin-bottom: 0.8rem; border-bottom: 1px solid #2a2a2a; padding-bottom: 0.4rem; }
+    .search-info {
+      font-size: 0.8rem;
+      color: #888;
+      margin-top: 0.25rem;
+      text-align: center;
+    }
+    .list-section {
+      width: 100%;
+      max-width: 40rem;
+      margin-bottom: 1.5rem;
+    }
+    .list-section h2 {
+      font-size: 1.2rem;
+      margin-bottom: 0.5rem;
+      border-bottom: 1px solid #2a2a2a;
+      padding-bottom: 0.3rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .list-count {
+      background: var(--accent);
+      color: var(--bg);
+      padding: 0.1rem 0.4rem;
+      border-radius: 0.8rem;
+      font-size: 0.7rem;
+      font-weight: bold;
+    }
     ul { list-style: none; }
-    li { padding: 0.35rem 0; border-bottom: 1px dashed #2a2a2a; word-break: break-word; }
-    footer {
-      margin-top: auto;
-      padding-top: 2rem;
+    li {
+      padding: 0.6rem 0.5rem;
+      border-bottom: 1px solid #2a2a2a;
+      word-break: break-word;
+      font-size: 0.95rem;
+      line-height: 1.3;
+      position: relative;
+      transition: background-color 0.2s;
+    }
+    li:hover {
+      background: #1a1a1a;
+    }
+    .wishlist-item {
+      border-left: 3px solid var(--wishlist);
+      padding-left: 0.8rem;
+    }
+    .owned-item {
+      border-left: 3px solid var(--owned);
+      padding-left: 0.8rem;
+      opacity: 0.7;
+    }
+    .match-highlight {
+      background: var(--accent);
+      color: var(--bg);
+      padding: 0.1rem 0.2rem;
+      border-radius: 0.2rem;
+    }
+    .status-indicator {
+      position: absolute;
+      right: 0.5rem;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+    }
+    .status-wishlist { background: var(--wishlist); }
+    .status-owned { background: var(--owned); }
+    .no-results {
       text-align: center;
       color: #888;
-      font-size: 0.9rem;
+      font-style: italic;
+      padding: 1rem;
+    }
+    .offline-indicator {
+      background: var(--error);
+      color: white;
+      padding: 0.5rem;
+      text-align: center;
+      font-size: 0.8rem;
+      margin-bottom: 1rem;
+      border-radius: 0.3rem;
+    }
+    footer {
+      margin-top: auto;
+      padding-top: 1rem;
+      text-align: center;
+      color: #888;
+      font-size: 0.8rem;
     }
     footer p {
       margin: 0;
+    }
+    @media (max-width: 480px) {
+      body { padding: 0.5rem 0.25rem 1rem; }
+      h1 { font-size: 1.3rem; }
+      .list-section h2 { font-size: 1.1rem; }
+      li { padding: 0.5rem 0.3rem; font-size: 0.9rem; }
     }
   </style>
 </head>
 <body>
   <h1>DVD Collection Tracker</h1>
-  <input id="searchBox" type="search" placeholder="Search DVDs…" autocomplete="off" />
+
+  <div class="search-container">
+    <input id="searchBox" type="search" placeholder="Search DVDs…" autocomplete="off" />
+    <div class="search-info" id="searchInfo">Type to search both lists</div>
+  </div>
 
   <div class="list-section" id="wishWrapper">
-    <h2>Wishlist</h2>
+    <h2>🎯 Wishlist <span class="list-count" id="wishCount">0</span></h2>
     <ul id="wishList"></ul>
   </div>
 
   <div class="list-section" id="ownedWrapper">
-    <h2>Owned</h2>
+    <h2>📚 Owned <span class="list-count" id="ownedCount">0</span></h2>
     <ul id="ownedList"></ul>
   </div>
 
@@ -85,6 +186,22 @@
 
   <script>
     let data = { owned: [], wishlist: [] };
+    let isOffline = false;
+
+    // Check if we're offline
+    function checkOfflineStatus() {
+      isOffline = !navigator.onLine;
+      const offlineIndicator = document.getElementById('offlineIndicator');
+      if (isOffline && !offlineIndicator) {
+        const indicator = document.createElement('div');
+        indicator.className = 'offline-indicator';
+        indicator.id = 'offlineIndicator';
+        indicator.textContent = '⚠️ Offline mode - using cached data';
+        document.body.insertBefore(indicator, document.querySelector('.search-container'));
+      } else if (!isOffline && offlineIndicator) {
+        offlineIndicator.remove();
+      }
+    }
 
     async function loadData() {
       try {
@@ -98,22 +215,42 @@
           const lastModifiedDateEl = document.getElementById('lastModifiedDate');
           lastModifiedDateEl.textContent = date.toLocaleString();
         } else {
-          // Fallback: try to get the current file's modification time
           const lastModifiedDateEl = document.getElementById('lastModifiedDate');
           lastModifiedDateEl.textContent = 'Date not available';
         }
 
         data = await res.json();
+
+        // Cache the data for offline use
+        localStorage.setItem('dvdData', JSON.stringify(data));
+        localStorage.setItem('dvdDataTimestamp', Date.now().toString());
+
       } catch (err) {
         console.error('Could not load dvd_data.json', err);
-        const lastModifiedDateEl = document.getElementById('lastModifiedDate');
-        lastModifiedDateEl.textContent = 'Error loading data';
+
+        // Try to load from cache
+        const cachedData = localStorage.getItem('dvdData');
+        if (cachedData) {
+          data = JSON.parse(cachedData);
+          const lastModifiedDateEl = document.getElementById('lastModifiedDate');
+          lastModifiedDateEl.textContent = 'Using cached data';
+        } else {
+          const lastModifiedDateEl = document.getElementById('lastModifiedDate');
+          lastModifiedDateEl.textContent = 'Error loading data';
+        }
       }
     }
 
     const ownedListEl = document.getElementById('ownedList');
     const wishListEl = document.getElementById('wishList');
     const searchBox = document.getElementById('searchBox');
+    const searchInfo = document.getElementById('searchInfo');
+
+    function highlightMatch(text, filter) {
+      if (!filter) return text;
+      const regex = new RegExp(`(${filter.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+      return text.replace(regex, '<span class="match-highlight">$1</span>');
+    }
 
     function render(filter = '') {
       const normFilter = filter.toLowerCase();
@@ -121,14 +258,56 @@
         ? arr.filter(t => t.toLowerCase().includes(normFilter))
         : arr;
 
-      ownedListEl.innerHTML = matches(data.owned).map(t => `<li>${t}</li>`).join('');
-      wishListEl.innerHTML = matches(data.wishlist).map(t => `<li>${t}</li>`).join('');
+      const wishlistMatches = matches(data.wishlist);
+      const ownedMatches = matches(data.owned);
+
+      // Update counts
+      document.getElementById('wishCount').textContent = data.wishlist.length;
+      document.getElementById('ownedCount').textContent = data.owned.length;
+
+      // Render wishlist
+      if (wishlistMatches.length === 0 && normFilter) {
+        wishListEl.innerHTML = '<li class="no-results">No wishlist items match your search</li>';
+      } else {
+        wishListEl.innerHTML = wishlistMatches.map(t =>
+          `<li class="wishlist-item">
+            ${highlightMatch(t, normFilter)}
+            <div class="status-indicator status-wishlist"></div>
+          </li>`
+        ).join('');
+      }
+
+      // Render owned list
+      if (ownedMatches.length === 0 && normFilter) {
+        ownedListEl.innerHTML = '<li class="no-results">No owned items match your search</li>';
+      } else {
+        ownedListEl.innerHTML = ownedMatches.map(t =>
+          `<li class="owned-item">
+            ${highlightMatch(t, normFilter)}
+            <div class="status-indicator status-owned"></div>
+          </li>`
+        ).join('');
+      }
+
+      // Update search info
+      if (normFilter) {
+        const totalMatches = wishlistMatches.length + ownedMatches.length;
+        searchInfo.textContent = `Found ${totalMatches} match${totalMatches !== 1 ? 'es' : ''}`;
+      } else {
+        searchInfo.textContent = 'Type to search both lists';
+      }
     }
 
     async function init() {
       await loadData();
       render();
+
       searchBox.addEventListener('input', e => render(e.target.value.trim()));
+
+      // Check offline status
+      checkOfflineStatus();
+      window.addEventListener('online', checkOfflineStatus);
+      window.addEventListener('offline', checkOfflineStatus);
     }
 
     document.addEventListener('DOMContentLoaded', init);
