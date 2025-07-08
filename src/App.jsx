@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import ListSection from './components/ListSection';
+import ConfirmDialog from './components/ConfirmDialog';
 
 export default function App() {
   const [owned, setOwned] = useState([]);
@@ -7,6 +8,7 @@ export default function App() {
   const [filter, setFilter] = useState('');
   const [lastModified, setLastModified] = useState('');
   const importRef = useRef(null);
+  const [confirmState, setConfirmState] = useState(null);
 
   useEffect(() => {
     loadData();
@@ -59,47 +61,67 @@ export default function App() {
     }
   }
 
+  const requestConfirm = (message, action) => {
+    setConfirmState({
+      message,
+      onConfirm: () => {
+        action();
+        setConfirmState(null);
+      },
+    });
+  };
+
+  const cancelConfirm = () => setConfirmState(null);
+
   const moveFromWishlist = (idx) => {
-    setWishlist((w) => {
-      const newW = [...w];
-      const [item] = newW.splice(idx, 1);
-      setOwned((o) => {
-        const newO = [...o, item];
-        saveToLocalStorage(newO, newW);
-        return newO;
+    requestConfirm('Move this title to owned?', () => {
+      setWishlist((w) => {
+        const newW = [...w];
+        const [item] = newW.splice(idx, 1);
+        setOwned((o) => {
+          const newO = [...o, item];
+          saveToLocalStorage(newO, newW);
+          return newO;
+        });
+        return newW;
       });
-      return newW;
     });
   };
 
   const deleteFromWishlist = (idx) => {
-    setWishlist((w) => {
-      const newW = [...w];
-      newW.splice(idx, 1);
-      saveToLocalStorage(owned, newW);
-      return newW;
+    requestConfirm('Are you sure you want to delete this title?', () => {
+      setWishlist((w) => {
+        const newW = [...w];
+        newW.splice(idx, 1);
+        saveToLocalStorage(owned, newW);
+        return newW;
+      });
     });
   };
 
   const moveFromOwned = (idx) => {
-    setOwned((o) => {
-      const newO = [...o];
-      const [item] = newO.splice(idx, 1);
-      setWishlist((w) => {
-        const newW = [...w, item];
-        saveToLocalStorage(newO, newW);
-        return newW;
+    requestConfirm('Move this title back to wishlist?', () => {
+      setOwned((o) => {
+        const newO = [...o];
+        const [item] = newO.splice(idx, 1);
+        setWishlist((w) => {
+          const newW = [...w, item];
+          saveToLocalStorage(newO, newW);
+          return newW;
+        });
+        return newO;
       });
-      return newO;
     });
   };
 
   const deleteFromOwned = (idx) => {
-    setOwned((o) => {
-      const newO = [...o];
-      newO.splice(idx, 1);
-      saveToLocalStorage(newO, wishlist);
-      return newO;
+    requestConfirm('Are you sure you want to delete this title?', () => {
+      setOwned((o) => {
+        const newO = [...o];
+        newO.splice(idx, 1);
+        saveToLocalStorage(newO, wishlist);
+        return newO;
+      });
     });
   };
 
@@ -219,6 +241,13 @@ export default function App() {
       <footer>
         <p>Last modified: {lastModified || 'Loading...'}</p>
       </footer>
+      {confirmState && (
+        <ConfirmDialog
+          message={confirmState.message}
+          onConfirm={confirmState.onConfirm}
+          onCancel={cancelConfirm}
+        />
+      )}
     </div>
   );
 }
