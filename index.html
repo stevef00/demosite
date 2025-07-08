@@ -23,6 +23,7 @@
 </head>
 <body>
   <h1>DVD Collection Tracker</h1>
+  <p class="search-info">Click a title to move it between lists. Alt-click to delete it.</p>
 
   <div class="search-container">
     <input id="searchBox" type="search" placeholder="Search DVDs…" autocomplete="off" />
@@ -33,11 +34,19 @@
   <div class="list-section" id="wishWrapper">
     <h2>Wishlist <span class="list-count" id="wishCount">0</span></h2>
     <ul id="wishList"></ul>
+    <div class="add-form">
+      <input id="wishInput" type="text" placeholder="Add to wishlist" />
+      <button id="wishAdd">Add</button>
+    </div>
   </div>
 
   <div class="list-section" id="ownedWrapper">
     <h2>Owned <span class="list-count" id="ownedCount">0</span></h2>
     <ul id="ownedList"></ul>
+    <div class="add-form">
+      <input id="ownedInput" type="text" placeholder="Add to owned" />
+      <button id="ownedAdd">Add</button>
+    </div>
   </div>
 
   <footer id="lastModified">
@@ -107,6 +116,10 @@
     const searchBox = document.getElementById('searchBox');
     const searchInfo = document.getElementById('searchInfo');
     const clearButton = document.querySelector('.clear-search-button');
+    const wishInput = document.getElementById('wishInput');
+    const ownedInput = document.getElementById('ownedInput');
+    const wishAdd = document.getElementById('wishAdd');
+    const ownedAdd = document.getElementById('ownedAdd');
 
     function updateClearButton() {
       if (searchBox.value.trim()) {
@@ -129,26 +142,35 @@
       return text.replace(regex, '<span class="match-highlight">$1</span>');
     }
 
+    function addItem(list, inputEl) {
+      const title = inputEl.value.trim();
+      if (!title) return;
+      data[list].push(title);
+      inputEl.value = '';
+      saveToLocalStorage();
+      render(searchBox.value.trim());
+    }
+
     function render(filter = '') {
       const normFilter = filter.toLowerCase();
-      const matches = arr => normFilter
-        ? arr.filter(t => t.toLowerCase().includes(normFilter))
-        : arr;
-
-      const wishlistMatches = matches(data.wishlist);
-      const ownedMatches = matches(data.owned);
+      const wishMatches = data.wishlist
+        .map((t, i) => ({ t, i }))
+        .filter(o => !normFilter || o.t.toLowerCase().includes(normFilter));
+      const ownedMatches = data.owned
+        .map((t, i) => ({ t, i }))
+        .filter(o => !normFilter || o.t.toLowerCase().includes(normFilter));
 
       // Update counts
       document.getElementById('wishCount').textContent = data.wishlist.length;
       document.getElementById('ownedCount').textContent = data.owned.length;
 
       // Render wishlist
-      if (wishlistMatches.length === 0 && normFilter) {
+      if (wishMatches.length === 0 && normFilter) {
         wishListEl.innerHTML = '<li class="no-results">No wishlist items match your search</li>';
       } else {
-        wishListEl.innerHTML = wishlistMatches.map(t =>
-          `<li class="wishlist-item">
-            ${highlightMatch(t, normFilter)}
+        wishListEl.innerHTML = wishMatches.map(o =>
+          `<li class="wishlist-item" data-index="${o.i}">
+            ${highlightMatch(o.t, normFilter)}
             <div class="status-indicator status-wishlist"></div>
           </li>`
         ).join('');
@@ -158,9 +180,9 @@
       if (ownedMatches.length === 0 && normFilter) {
         ownedListEl.innerHTML = '<li class="no-results">No owned items match your search</li>';
       } else {
-        ownedListEl.innerHTML = ownedMatches.map(t =>
-          `<li class="owned-item">
-            ${highlightMatch(t, normFilter)}
+        ownedListEl.innerHTML = ownedMatches.map(o =>
+          `<li class="owned-item" data-index="${o.i}">
+            ${highlightMatch(o.t, normFilter)}
             <div class="status-indicator status-owned"></div>
           </li>`
         ).join('');
@@ -168,7 +190,7 @@
 
       // Update search info
       if (normFilter) {
-        const totalMatches = wishlistMatches.length + ownedMatches.length;
+        const totalMatches = wishMatches.length + ownedMatches.length;
         searchInfo.textContent = `Found ${totalMatches} match${totalMatches !== 1 ? 'es' : ''}`;
       } else {
         searchInfo.textContent = 'Type to search both lists';
@@ -185,6 +207,50 @@
       });
 
       clearButton.addEventListener('click', clearSearch);
+
+      wishAdd.addEventListener('click', () => addItem('wishlist', wishInput));
+      ownedAdd.addEventListener('click', () => addItem('owned', ownedInput));
+
+      wishInput.addEventListener('keypress', e => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          wishAdd.click();
+        }
+      });
+      ownedInput.addEventListener('keypress', e => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          ownedAdd.click();
+        }
+      });
+
+      wishListEl.addEventListener('click', e => {
+        const li = e.target.closest('li[data-index]');
+        if (!li) return;
+        const idx = parseInt(li.dataset.index, 10);
+        if (e.altKey) {
+          data.wishlist.splice(idx, 1);
+        } else {
+          const [item] = data.wishlist.splice(idx, 1);
+          data.owned.push(item);
+        }
+        saveToLocalStorage();
+        render(searchBox.value.trim());
+      });
+
+      ownedListEl.addEventListener('click', e => {
+        const li = e.target.closest('li[data-index]');
+        if (!li) return;
+        const idx = parseInt(li.dataset.index, 10);
+        if (e.altKey) {
+          data.owned.splice(idx, 1);
+        } else {
+          const [item] = data.owned.splice(idx, 1);
+          data.wishlist.push(item);
+        }
+        saveToLocalStorage();
+        render(searchBox.value.trim());
+      });
 
     }
 
