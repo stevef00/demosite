@@ -94,3 +94,29 @@ test('items in both lists get duplicate-item class', () => {
   expect(wishLi.classList.contains('duplicate-item')).toBe(true);
   expect(ownLi.classList.contains('duplicate-item')).toBe(true);
 });
+
+test('duplicate add shows confirmation and adds on confirm', () => {
+  const { container, getByPlaceholderText } = renderWithData({ owned: ['A'], wishlist: [] });
+  const input = getByPlaceholderText('Add to wishlist');
+  fireEvent.change(input, { target: { value: 'a' } });
+  const addBtn = input.parentElement.querySelector('button');
+  fireEvent.click(addBtn);
+  expect(screen.getByText('Title already exists—add anyway?')).toBeInTheDocument();
+  fireEvent.click(screen.getByText('Yes'));
+  const wishItems = container.querySelectorAll('.wishlist-item span');
+  expect(wishItems.length).toBe(1);
+  expect(wishItems[0].textContent).toBe('a');
+});
+
+test('duplicate add does not add when cancelled', () => {
+  const { container, getByPlaceholderText } = renderWithData({ owned: ['A'], wishlist: [] });
+  const input = getByPlaceholderText('Add to wishlist');
+  fireEvent.change(input, { target: { value: 'a' } });
+  const addBtn = input.parentElement.querySelector('button');
+  fireEvent.click(addBtn);
+  expect(screen.getByText('Title already exists—add anyway?')).toBeInTheDocument();
+  fireEvent.click(screen.getByText('No'));
+  expect(screen.queryByText('Title already exists—add anyway?')).toBeNull();
+  const wishItems = container.querySelectorAll('.wishlist-item span');
+  expect(wishItems.length).toBe(0);
+});
