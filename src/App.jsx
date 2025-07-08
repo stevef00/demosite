@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import ListSection from './components/ListSection';
 import ConfirmDialog from './components/ConfirmDialog';
+import { sortTitles } from './utils';
 
 export default function App() {
   const [owned, setOwned] = useState([]);
@@ -19,8 +20,11 @@ export default function App() {
     if (cached) {
       try {
         const parsed = JSON.parse(cached);
-        setOwned(parsed.owned || []);
-        setWishlist(parsed.wishlist || []);
+        const sortedO = sortTitles(parsed.owned || []);
+        const sortedW = sortTitles(parsed.wishlist || []);
+        setOwned(sortedO);
+        setWishlist(sortedW);
+        saveToLocalStorage(sortedO, sortedW);
         const ts = localStorage.getItem('dvdDataTimestamp');
         if (ts) {
           const date = new Date(parseInt(ts, 10));
@@ -52,9 +56,11 @@ export default function App() {
       const lm = res.headers.get('last-modified');
       if (lm) setLastModified(new Date(lm).toLocaleString());
       const json = await res.json();
-      setOwned(json.owned || []);
-      setWishlist(json.wishlist || []);
-      saveToLocalStorage(json.owned || [], json.wishlist || []);
+      const sortedO = sortTitles(json.owned || []);
+      const sortedW = sortTitles(json.wishlist || []);
+      setOwned(sortedO);
+      setWishlist(sortedW);
+      saveToLocalStorage(sortedO, sortedW);
     } catch (err) {
       console.error('Could not load dvd_data.json', err);
       setLastModified('Error loading data');
@@ -76,8 +82,8 @@ export default function App() {
   const moveFromWishlist = (idx) => {
     requestConfirm('Move this title to owned?', () => {
       const item = wishlist[idx];
-      const newW = wishlist.filter((_, i) => i !== idx);
-      const newO = [...owned, item];
+      const newW = sortTitles(wishlist.filter((_, i) => i !== idx));
+      const newO = sortTitles([...owned, item]);
       setWishlist(newW);
       setOwned(newO);
       saveToLocalStorage(newO, newW);
@@ -98,8 +104,8 @@ export default function App() {
   const moveFromOwned = (idx) => {
     requestConfirm('Move this title back to wishlist?', () => {
       const item = owned[idx];
-      const newO = owned.filter((_, i) => i !== idx);
-      const newW = [...wishlist, item];
+      const newO = sortTitles(owned.filter((_, i) => i !== idx));
+      const newW = sortTitles([...wishlist, item]);
       setOwned(newO);
       setWishlist(newW);
       saveToLocalStorage(newO, newW);
@@ -119,7 +125,7 @@ export default function App() {
 
   const addWishlist = (title) => {
     setWishlist((w) => {
-      const newW = [...w, title];
+      const newW = sortTitles([...w, title]);
       saveToLocalStorage(owned, newW);
       return newW;
     });
@@ -127,7 +133,7 @@ export default function App() {
 
   const addOwned = (title) => {
     setOwned((o) => {
-      const newO = [...o, title];
+      const newO = sortTitles([...o, title]);
       saveToLocalStorage(newO, wishlist);
       return newO;
     });
@@ -159,10 +165,12 @@ export default function App() {
         if (!parsed || !Array.isArray(parsed.owned) || !Array.isArray(parsed.wishlist)) {
           throw new Error('Invalid format');
         }
-        setOwned(parsed.owned);
-        setWishlist(parsed.wishlist);
+        const sortedO = sortTitles(parsed.owned);
+        const sortedW = sortTitles(parsed.wishlist);
+        setOwned(sortedO);
+        setWishlist(sortedW);
         setLastModified(new Date().toLocaleString());
-        saveToLocalStorage(parsed.owned, parsed.wishlist);
+        saveToLocalStorage(sortedO, sortedW);
       } catch (err) {
         alert('Invalid JSON file');
         console.error('Import failed', err);
