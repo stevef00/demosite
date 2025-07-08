@@ -1,8 +1,10 @@
 module.exports = {
-  testEnvironment: 'jsdom',
+  // Use the Node environment since jsdom is not available
+  testEnvironment: 'node',
   moduleFileExtensions: ['js', 'jsx'],
   transform: {
     '^.+\\.(js|jsx)$': 'babel-jest'
   },
-  setupFilesAfterEnv: ['@testing-library/jest-dom/extend-expect']
+  // Load custom jest setup for additional matchers
+  setupFilesAfterEnv: ['<rootDir>/jest.setup.js']
 };
