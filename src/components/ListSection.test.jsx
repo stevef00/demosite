@@ -20,9 +20,9 @@ describe('ListSection', () => {
     ).toBeInTheDocument();
   });
 
-  test('calls onMove when Move button clicked', () => {
+  test('calls onMove when Move option clicked', () => {
     const onMove = jest.fn();
-    const { getByLabelText } = render(
+    const { getByLabelText, getByText } = render(
       <ListSection
         title="Wishlist"
         items={["A"]}
@@ -31,13 +31,14 @@ describe('ListSection', () => {
         filter=""
       />
     );
-    fireEvent.click(getByLabelText('Move'));
+    fireEvent.click(getByLabelText('Actions'));
+    fireEvent.click(getByText('Move'));
     expect(onMove).toHaveBeenCalledWith(0);
   });
 
-  test('calls onDelete when Delete button clicked', () => {
+  test('calls onDelete when Delete option clicked', () => {
     const onDelete = jest.fn();
-    const { getByLabelText } = render(
+    const { getByLabelText, getByText } = render(
       <ListSection
         title="Wishlist"
         items={["A"]}
@@ -46,7 +47,8 @@ describe('ListSection', () => {
         filter=""
       />
     );
-    fireEvent.click(getByLabelText('Delete'));
+    fireEvent.click(getByLabelText('Actions'));
+    fireEvent.click(getByText('Delete'));
     expect(onDelete).toHaveBeenCalledWith(0);
   });
 
