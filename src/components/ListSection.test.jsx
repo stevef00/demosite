@@ -12,7 +12,7 @@ describe.skip('ListSection', () => {
       <ListSection
         title="Wishlist"
         items={[]}
-        onItemClick={() => {}}
+        onMove={() => {}}
         onDelete={() => {}}
         onAdd={onAdd}
         placeholder="Add item"
@@ -29,7 +29,7 @@ describe.skip('ListSection', () => {
       <ListSection
         title="Wishlist"
         items={['Star Wars', 'Toy Story']}
-        onItemClick={() => {}}
+        onMove={() => {}}
         onDelete={() => {}}
         onAdd={() => {}}
         placeholder="Add item"

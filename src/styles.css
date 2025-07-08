@@ -156,6 +156,17 @@ li:hover {
 .delete-button:hover {
   color: #fff;
 }
+.move-button {
+  background: transparent;
+  border: none;
+  color: #888;
+  cursor: pointer;
+  padding: 0 0.3rem;
+  float: right;
+}
+.move-button:hover {
+  color: #fff;
+}
 .wishlist-item {
   border-left: 3px solid var(--wishlist);
   padding-left: 0.8rem;
@@ -212,4 +223,8 @@ footer p {
   h1 { font-size: 1.3rem; }
   .list-section h2 { font-size: 1.1rem; }
   li { padding: 0.5rem 0.3rem; font-size: 0.9rem; }
+  .move-button,
+  .delete-button {
+    font-size: 1rem;
+  }
 }
