@@ -163,8 +163,8 @@ export default function App() {
     <div>
       <h1>DVD Collection Tracker</h1>
       <p className="search-info">
-        Click a title to move it between lists. Use the Delete button to remove
-        it.
+        Use the Move button to transfer a title between lists. Use Delete to
+        remove it.
       </p>
       <div className="search-container">
         <input
@@ -190,7 +190,7 @@ export default function App() {
       <ListSection
         title="Wishlist"
         items={wishlist}
-        onItemClick={moveFromWishlist}
+        onMove={moveFromWishlist}
         onDelete={deleteFromWishlist}
         onAdd={addWishlist}
         placeholder="Add to wishlist"
@@ -199,7 +199,7 @@ export default function App() {
       <ListSection
         title="Owned"
         items={owned}
-        onItemClick={moveFromOwned}
+        onMove={moveFromOwned}
         onDelete={deleteFromOwned}
         onAdd={addOwned}
         placeholder="Add to owned"

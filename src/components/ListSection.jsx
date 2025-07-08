@@ -4,7 +4,7 @@ import { highlightMatch } from '../utils';
 export default function ListSection({
   title,
   items,
-  onItemClick,
+  onMove = () => {},
   onAdd,
   onDelete = () => {},
   placeholder,
@@ -45,13 +45,22 @@ export default function ListSection({
             <li
               key={o.i}
               className={`${title.toLowerCase()}-item`}
-              onClick={() => onItemClick(o.i)}
             >
               <span
                 dangerouslySetInnerHTML={{
                   __html: highlightMatch(o.t, normFilter),
                 }}
               />
+              <button
+                className="move-button"
+                aria-label="Move"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onMove(o.i);
+                }}
+              >
+                ➡️
+              </button>
               <button
                 className="delete-button"
                 aria-label="Delete"
