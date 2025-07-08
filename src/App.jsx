@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState, useMemo } from 'react';
 import ListSection from './components/ListSection';
 import ConfirmDialog from './components/ConfirmDialog';
 import AddDialog from './components/AddDialog';
-import { sortTitles } from './utils';
+import { sortTitles, addItem as computeAddItem } from './utils';
 
 export default function App() {
   const [owned, setOwned] = useState([]);
@@ -136,28 +136,20 @@ export default function App() {
   };
 
   const addItem = (list, title) => {
-    const normalized = title.toLowerCase();
-    const exists =
-      owned.some((t) => t.toLowerCase() === normalized) ||
-      wishlist.some((t) => t.toLowerCase() === normalized);
+    const { owned: newO, wishlist: newW, duplicate } = computeAddItem(
+      list,
+      title,
+      owned,
+      wishlist
+    );
 
     const insert = () => {
-      if (list === 'wishlist') {
-        setWishlist((w) => {
-          const newW = sortTitles([...w, title]);
-          saveToLocalStorage(owned, newW);
-          return newW;
-        });
-      } else {
-        setOwned((o) => {
-          const newO = sortTitles([...o, title]);
-          saveToLocalStorage(newO, wishlist);
-          return newO;
-        });
-      }
+      setOwned(newO);
+      setWishlist(newW);
+      saveToLocalStorage(newO, newW);
     };
 
-    if (exists) {
+    if (duplicate) {
       requestConfirm('Title already exists—add anyway?', insert);
     } else {
       insert();
@@ -223,6 +215,7 @@ export default function App() {
           id="searchBox"
           type="search"
           placeholder="Search DVDs…"
+          aria-label="Search titles"
           autoComplete="off"
           value={filter}
           onChange={(e) => setFilter(e.target.value)}

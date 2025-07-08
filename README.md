@@ -35,7 +35,7 @@ npm test
 ## Features
 
 - Manage owned and wishlist DVD lists.
-- Search, add, move and delete titles.
+- Search, add, move and delete titles using the on-page controls.
 - Import/export collection data as JSON.
 - Data persists in `localStorage`.
 
@@ -46,7 +46,9 @@ Each title has a **Move** button (➡️) and a **Delete** button (🗑️).
 - **Move** transfers the title to the other list (owned ↔ wishlist).
 - **Delete** permanently removes the title.
 
-Both actions show a confirmation dialog before the change is applied.
+Both actions show a confirmation dialog before the change is applied. Use the
+**+** button in the header to open a dialog for adding a new title to either
+list.
 
 ## Project Structure
 
