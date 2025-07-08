@@ -6,6 +6,7 @@ export default function ListSection({
   items,
   onItemClick,
   onAdd,
+  onDelete = () => {},
   placeholder,
   filter,
 }) {
@@ -44,9 +45,24 @@ export default function ListSection({
             <li
               key={o.i}
               className={`${title.toLowerCase()}-item`}
-              onClick={(e) => onItemClick(o.i, e.altKey)}
-              dangerouslySetInnerHTML={{ __html: highlightMatch(o.t, normFilter) }}
-            />
+              onClick={() => onItemClick(o.i)}
+            >
+              <span
+                dangerouslySetInnerHTML={{
+                  __html: highlightMatch(o.t, normFilter),
+                }}
+              />
+              <button
+                className="delete-button"
+                aria-label="Delete"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDelete(o.i);
+                }}
+              >
+                🗑️
+              </button>
+            </li>
           ))
         )}
       </ul>
