@@ -46,58 +46,59 @@
 
   <script>
     let data = { owned: [], wishlist: [] };
-    let isOffline = false;
 
-    // Check if we're offline
-    function checkOfflineStatus() {
-      isOffline = !navigator.onLine;
-      const offlineIndicator = document.getElementById('offlineIndicator');
-      if (isOffline && !offlineIndicator) {
-        const indicator = document.createElement('div');
-        indicator.className = 'offline-indicator';
-        indicator.id = 'offlineIndicator';
-        indicator.textContent = '⚠️ Offline mode - using cached data';
-        document.body.insertBefore(indicator, document.querySelector('.search-container'));
-      } else if (!isOffline && offlineIndicator) {
-        offlineIndicator.remove();
+    function loadFromLocalStorage() {
+      const cached = localStorage.getItem('dvdData');
+      if (cached) {
+        try {
+          data = JSON.parse(cached);
+          return true;
+        } catch (err) {
+          console.error('Failed to parse cached data', err);
+          localStorage.removeItem('dvdData');
+          localStorage.removeItem('dvdDataTimestamp');
+        }
       }
+      return false;
+    }
+
+    function saveToLocalStorage() {
+      localStorage.setItem('dvdData', JSON.stringify(data));
+      localStorage.setItem('dvdDataTimestamp', Date.now().toString());
     }
 
     async function loadData() {
+      if (loadFromLocalStorage()) {
+        const ts = localStorage.getItem('dvdDataTimestamp');
+        const lastModifiedDateEl = document.getElementById('lastModifiedDate');
+        if (ts) {
+          const date = new Date(parseInt(ts, 10));
+          lastModifiedDateEl.textContent = date.toLocaleString();
+        } else {
+          lastModifiedDateEl.textContent = 'Local data';
+        }
+        return;
+      }
+
       try {
         const res = await fetch('dvd_data.json');
         if (!res.ok) throw new Error(res.status);
 
-        // Get the last-modified header
         const lastModified = res.headers.get('last-modified');
+        const lastModifiedDateEl = document.getElementById('lastModifiedDate');
         if (lastModified) {
           const date = new Date(lastModified);
-          const lastModifiedDateEl = document.getElementById('lastModifiedDate');
           lastModifiedDateEl.textContent = date.toLocaleString();
         } else {
-          const lastModifiedDateEl = document.getElementById('lastModifiedDate');
           lastModifiedDateEl.textContent = 'Date not available';
         }
 
         data = await res.json();
-
-        // Cache the data for offline use
-        localStorage.setItem('dvdData', JSON.stringify(data));
-        localStorage.setItem('dvdDataTimestamp', Date.now().toString());
-
+        saveToLocalStorage();
       } catch (err) {
         console.error('Could not load dvd_data.json', err);
-
-        // Try to load from cache
-        const cachedData = localStorage.getItem('dvdData');
-        if (cachedData) {
-          data = JSON.parse(cachedData);
-          const lastModifiedDateEl = document.getElementById('lastModifiedDate');
-          lastModifiedDateEl.textContent = 'Using cached data';
-        } else {
-          const lastModifiedDateEl = document.getElementById('lastModifiedDate');
-          lastModifiedDateEl.textContent = 'Error loading data';
-        }
+        const lastModifiedDateEl = document.getElementById('lastModifiedDate');
+        lastModifiedDateEl.textContent = 'Error loading data';
       }
     }
 
@@ -185,10 +186,6 @@
 
       clearButton.addEventListener('click', clearSearch);
 
-      // Check offline status
-      checkOfflineStatus();
-      window.addEventListener('online', checkOfflineStatus);
-      window.addEventListener('offline', checkOfflineStatus);
     }
 
     document.addEventListener('DOMContentLoaded', init);
