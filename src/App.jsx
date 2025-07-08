@@ -134,19 +134,45 @@ export default function App() {
   };
 
   const addWishlist = (title) => {
-    setWishlist((w) => {
-      const newW = sortTitles([...w, title]);
-      saveToLocalStorage(owned, newW);
-      return newW;
-    });
+    const normalized = title.toLowerCase();
+    const exists =
+      wishlist.some((t) => t.toLowerCase() === normalized) ||
+      owned.some((t) => t.toLowerCase() === normalized);
+
+    const insert = () => {
+      setWishlist((w) => {
+        const newW = sortTitles([...w, title]);
+        saveToLocalStorage(owned, newW);
+        return newW;
+      });
+    };
+
+    if (exists) {
+      requestConfirm('Title already exists—add anyway?', insert);
+    } else {
+      insert();
+    }
   };
 
   const addOwned = (title) => {
-    setOwned((o) => {
-      const newO = sortTitles([...o, title]);
-      saveToLocalStorage(newO, wishlist);
-      return newO;
-    });
+    const normalized = title.toLowerCase();
+    const exists =
+      owned.some((t) => t.toLowerCase() === normalized) ||
+      wishlist.some((t) => t.toLowerCase() === normalized);
+
+    const insert = () => {
+      setOwned((o) => {
+        const newO = sortTitles([...o, title]);
+        saveToLocalStorage(newO, wishlist);
+        return newO;
+      });
+    };
+
+    if (exists) {
+      requestConfirm('Title already exists—add anyway?', insert);
+    } else {
+      insert();
+    }
   };
 
   const clearSearch = () => setFilter('');
