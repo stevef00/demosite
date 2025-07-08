@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState, useMemo } from 'react';
 import ListSection from './components/ListSection';
 import ConfirmDialog from './components/ConfirmDialog';
+import AddDialog from './components/AddDialog';
 import { sortTitles } from './utils';
 
 export default function App() {
@@ -10,6 +11,7 @@ export default function App() {
   const [lastModified, setLastModified] = useState('');
   const importRef = useRef(null);
   const [confirmState, setConfirmState] = useState(null);
+  const [addDialogOpen, setAddDialogOpen] = useState(false);
 
   const duplicates = useMemo(() => {
     const ownedSet = new Set(owned.map((t) => t.toLowerCase()));
@@ -133,39 +135,26 @@ export default function App() {
     });
   };
 
-  const addWishlist = (title) => {
-    const normalized = title.toLowerCase();
-    const exists =
-      wishlist.some((t) => t.toLowerCase() === normalized) ||
-      owned.some((t) => t.toLowerCase() === normalized);
-
-    const insert = () => {
-      setWishlist((w) => {
-        const newW = sortTitles([...w, title]);
-        saveToLocalStorage(owned, newW);
-        return newW;
-      });
-    };
-
-    if (exists) {
-      requestConfirm('Title already exists—add anyway?', insert);
-    } else {
-      insert();
-    }
-  };
-
-  const addOwned = (title) => {
+  const addItem = (list, title) => {
     const normalized = title.toLowerCase();
     const exists =
       owned.some((t) => t.toLowerCase() === normalized) ||
       wishlist.some((t) => t.toLowerCase() === normalized);
 
     const insert = () => {
-      setOwned((o) => {
-        const newO = sortTitles([...o, title]);
-        saveToLocalStorage(newO, wishlist);
-        return newO;
-      });
+      if (list === 'wishlist') {
+        setWishlist((w) => {
+          const newW = sortTitles([...w, title]);
+          saveToLocalStorage(owned, newW);
+          return newW;
+        });
+      } else {
+        setOwned((o) => {
+          const newO = sortTitles([...o, title]);
+          saveToLocalStorage(newO, wishlist);
+          return newO;
+        });
+      }
     };
 
     if (exists) {
@@ -219,7 +208,16 @@ export default function App() {
 
   return (
     <div>
-      <h1>DVD Collection Tracker</h1>
+      <header>
+        <h1>DVD Collection Tracker</h1>
+        <button
+          className="add-button"
+          aria-label="Add"
+          onClick={() => setAddDialogOpen(true)}
+        >
+          +
+        </button>
+      </header>
       <p className="search-info">
         Use the Move button to send a title to the other list or Delete to
         remove it. A confirmation dialog will appear before either action is
@@ -251,8 +249,6 @@ export default function App() {
         items={wishlist}
         onMove={moveFromWishlist}
         onDelete={deleteFromWishlist}
-        onAdd={addWishlist}
-        placeholder="Add to wishlist"
         filter={filter}
         duplicates={duplicates}
       />
@@ -261,8 +257,6 @@ export default function App() {
         items={owned}
         onMove={moveFromOwned}
         onDelete={deleteFromOwned}
-        onAdd={addOwned}
-        placeholder="Add to owned"
         filter={filter}
         duplicates={duplicates}
       />
@@ -280,6 +274,15 @@ export default function App() {
       <footer>
         <p>Last modified: {lastModified || 'Loading...'}</p>
       </footer>
+      {addDialogOpen && (
+        <AddDialog
+          onAdd={(list, title) => {
+            addItem(list, title);
+            setAddDialogOpen(false);
+          }}
+          onCancel={() => setAddDialogOpen(false)}
+        />
+      )}
       {confirmState && (
         <ConfirmDialog
           message={confirmState.message}
