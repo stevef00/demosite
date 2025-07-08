@@ -218,11 +218,6 @@ export default function App() {
           +
         </button>
       </header>
-      <p className="search-info">
-        Use the Move button to send a title to the other list or Delete to
-        remove it. A confirmation dialog will appear before either action is
-        applied.
-      </p>
       <div className="search-container">
         <input
           id="searchBox"
