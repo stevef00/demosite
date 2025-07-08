@@ -34,6 +34,42 @@ describe('ListSection', () => {
       />
     );
     expect(queryByText('Star Wars')).toBeNull();
-    expect(queryByText('Toy Story')).toBeInTheDocument();
+    expect(
+      queryByText((content, element) => element.textContent === 'Toy Story')
+    ).toBeInTheDocument();
+  });
+
+  test('calls onMove when Move button clicked', () => {
+    const onMove = jest.fn();
+    const { getByLabelText } = render(
+      <ListSection
+        title="Wishlist"
+        items={["A"]}
+        onMove={onMove}
+        onDelete={() => {}}
+        onAdd={() => {}}
+        placeholder="Add item"
+        filter=""
+      />
+    );
+    fireEvent.click(getByLabelText('Move'));
+    expect(onMove).toHaveBeenCalledWith(0);
+  });
+
+  test('calls onDelete when Delete button clicked', () => {
+    const onDelete = jest.fn();
+    const { getByLabelText } = render(
+      <ListSection
+        title="Wishlist"
+        items={["A"]}
+        onMove={() => {}}
+        onDelete={onDelete}
+        onAdd={() => {}}
+        placeholder="Add item"
+        filter=""
+      />
+    );
+    fireEvent.click(getByLabelText('Delete'));
+    expect(onDelete).toHaveBeenCalledWith(0);
   });
 });
