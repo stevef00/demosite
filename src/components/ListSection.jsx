@@ -1,5 +1,6 @@
 import React from 'react';
 import { highlightMatch } from '../utils';
+import ItemMenu from './ItemMenu';
 
 export default function ListSection({
   title,
@@ -37,26 +38,10 @@ export default function ListSection({
                   __html: highlightMatch(o.t, normFilter),
                 }}
               />
-              <button
-                className="move-button"
-                aria-label="Move"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onMove(o.i);
-                }}
-              >
-                ➡️
-              </button>
-              <button
-                className="delete-button"
-                aria-label="Delete"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onDelete(o.i);
-                }}
-              >
-                🗑️
-              </button>
+              <ItemMenu
+                onMove={() => onMove(o.i)}
+                onDelete={() => onDelete(o.i)}
+              />
             </li>
           ))
         )}
