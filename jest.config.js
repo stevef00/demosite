@@ -1,6 +1,6 @@
 module.exports = {
-  // Use the Node environment since jsdom is not available
-  testEnvironment: 'node',
+  // Run tests in a browser-like environment
+  testEnvironment: 'jsdom',
   moduleFileExtensions: ['js', 'jsx'],
   transform: {
     '^.+\\.(js|jsx)$': 'babel-jest'
