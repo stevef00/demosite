@@ -1,31 +1,14 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { highlightMatch } from '../utils';
 
 export default function ListSection({
   title,
   items,
   onMove = () => {},
-  onAdd,
   onDelete = () => {},
-  placeholder,
   filter,
   duplicates = new Set(),
 }) {
-  const [input, setInput] = useState('');
-
-  const handleAdd = () => {
-    const val = input.trim();
-    if (!val) return;
-    onAdd(val);
-    setInput('');
-  };
-
-  const handleKeyPress = (e) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      handleAdd();
-    }
-  };
 
   const normFilter = filter.toLowerCase();
   const matches = items
@@ -78,16 +61,6 @@ export default function ListSection({
           ))
         )}
       </ul>
-      <div className="add-form">
-        <input
-          type="text"
-          placeholder={placeholder}
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyPress={handleKeyPress}
-        />
-        <button onClick={handleAdd}>Add</button>
-      </div>
     </div>
   );
 }

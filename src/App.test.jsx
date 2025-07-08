@@ -49,11 +49,10 @@ test('moving owned item adds it once to wishlist', () => {
 });
 
 test('adding to wishlist keeps items sorted', () => {
-  const { container, getByPlaceholderText } = renderWithData({ owned: [], wishlist: ['B'] });
-  const input = getByPlaceholderText('Add to wishlist');
-  fireEvent.change(input, { target: { value: 'A' } });
-  const addBtn = input.parentElement.querySelector('button');
-  fireEvent.click(addBtn);
+  const { container } = renderWithData({ owned: [], wishlist: ['B'] });
+  fireEvent.click(screen.getByLabelText('Add'));
+  fireEvent.change(screen.getByPlaceholderText('Title'), { target: { value: 'A' } });
+  fireEvent.click(screen.getByText('Add'));
   const items = Array.from(container.querySelectorAll('.wishlist-item span')).map((el) => el.textContent);
   expect(items).toEqual(['A', 'B']);
 });
@@ -78,11 +77,11 @@ test('moving from owned keeps wishlist sorted', () => {
 });
 
 test('adding to owned keeps items sorted', () => {
-  const { container, getByPlaceholderText } = renderWithData({ owned: ['B'], wishlist: [] });
-  const input = getByPlaceholderText('Add to owned');
-  fireEvent.change(input, { target: { value: 'A' } });
-  const addBtn = input.parentElement.querySelector('button');
-  fireEvent.click(addBtn);
+  const { container } = renderWithData({ owned: ['B'], wishlist: [] });
+  fireEvent.click(screen.getByLabelText('Add'));
+  fireEvent.change(screen.getByPlaceholderText('Title'), { target: { value: 'A' } });
+  fireEvent.change(screen.getByLabelText('Target list'), { target: { value: 'owned' } });
+  fireEvent.click(screen.getByText('Add'));
   const ownedTitles = Array.from(container.querySelectorAll('.owned-item span')).map((el) => el.textContent);
   expect(ownedTitles).toEqual(['A', 'B']);
 });
@@ -96,11 +95,10 @@ test('items in both lists get duplicate-item class', () => {
 });
 
 test('duplicate add shows confirmation and adds on confirm', () => {
-  const { container, getByPlaceholderText } = renderWithData({ owned: ['A'], wishlist: [] });
-  const input = getByPlaceholderText('Add to wishlist');
-  fireEvent.change(input, { target: { value: 'a' } });
-  const addBtn = input.parentElement.querySelector('button');
-  fireEvent.click(addBtn);
+  const { container } = renderWithData({ owned: ['A'], wishlist: [] });
+  fireEvent.click(screen.getByLabelText('Add'));
+  fireEvent.change(screen.getByPlaceholderText('Title'), { target: { value: 'a' } });
+  fireEvent.click(screen.getByText('Add'));
   expect(screen.getByText('Title already exists—add anyway?')).toBeInTheDocument();
   fireEvent.click(screen.getByText('Yes'));
   const wishItems = container.querySelectorAll('.wishlist-item span');
@@ -109,11 +107,10 @@ test('duplicate add shows confirmation and adds on confirm', () => {
 });
 
 test('duplicate add does not add when cancelled', () => {
-  const { container, getByPlaceholderText } = renderWithData({ owned: ['A'], wishlist: [] });
-  const input = getByPlaceholderText('Add to wishlist');
-  fireEvent.change(input, { target: { value: 'a' } });
-  const addBtn = input.parentElement.querySelector('button');
-  fireEvent.click(addBtn);
+  const { container } = renderWithData({ owned: ['A'], wishlist: [] });
+  fireEvent.click(screen.getByLabelText('Add'));
+  fireEvent.change(screen.getByPlaceholderText('Title'), { target: { value: 'a' } });
+  fireEvent.click(screen.getByText('Add'));
   expect(screen.getByText('Title already exists—add anyway?')).toBeInTheDocument();
   fireEvent.click(screen.getByText('No'));
   expect(screen.queryByText('Title already exists—add anyway?')).toBeNull();
@@ -122,11 +119,10 @@ test('duplicate add does not add when cancelled', () => {
 });
 
 test('duplicate add highlights items on confirm', () => {
-  const { container, getByPlaceholderText } = renderWithData({ owned: ['A'], wishlist: [] });
-  const input = getByPlaceholderText('Add to wishlist');
-  fireEvent.change(input, { target: { value: 'a' } });
-  const addBtn = input.parentElement.querySelector('button');
-  fireEvent.click(addBtn);
+  const { container } = renderWithData({ owned: ['A'], wishlist: [] });
+  fireEvent.click(screen.getByLabelText('Add'));
+  fireEvent.change(screen.getByPlaceholderText('Title'), { target: { value: 'a' } });
+  fireEvent.click(screen.getByText('Add'));
   expect(screen.getByText('Title already exists—add anyway?')).toBeInTheDocument();
   fireEvent.click(screen.getByText('Yes'));
   const wishLi = container.querySelector('.wishlist-item');
