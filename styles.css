@@ -83,6 +83,27 @@ h1 {
 .add-form button:hover {
   background: #0298c4;
 }
+
+.storage-buttons {
+  margin: 1rem 0;
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+}
+
+.storage-buttons button {
+  background: var(--accent);
+  color: var(--bg);
+  border: none;
+  border-radius: 0.3rem;
+  padding: 0.4rem 0.8rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.storage-buttons button:hover {
+  background: #0298c4;
+}
 .search-info {
   font-size: 0.8rem;
   color: #888;

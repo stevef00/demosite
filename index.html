@@ -49,6 +49,12 @@
     </div>
   </div>
 
+  <div class="storage-buttons">
+    <button id="exportBtn">Export</button>
+    <input id="importFile" type="file" accept="application/json" hidden />
+    <button id="importBtn">Import</button>
+  </div>
+
   <footer id="lastModified">
     <p>Last modified: <span id="lastModifiedDate">Loading...</span></p>
   </footer>
@@ -120,6 +126,9 @@
     const ownedInput = document.getElementById('ownedInput');
     const wishAdd = document.getElementById('wishAdd');
     const ownedAdd = document.getElementById('ownedAdd');
+    const exportBtn = document.getElementById('exportBtn');
+    const importBtn = document.getElementById('importBtn');
+    const importFile = document.getElementById('importFile');
 
     function updateClearButton() {
       if (searchBox.value.trim()) {
@@ -149,6 +158,42 @@
       inputEl.value = '';
       saveToLocalStorage();
       render(searchBox.value.trim());
+    }
+
+    function exportData() {
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'dvd_data.json';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    }
+
+    function importData(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = e => {
+        try {
+          const parsed = JSON.parse(e.target.result);
+          if (!parsed || !Array.isArray(parsed.owned) || !Array.isArray(parsed.wishlist)) {
+            throw new Error('Invalid format');
+          }
+          data = { owned: [...parsed.owned], wishlist: [...parsed.wishlist] };
+          saveToLocalStorage();
+          document.getElementById('lastModifiedDate').textContent = new Date().toLocaleString();
+          render(searchBox.value.trim());
+        } catch (err) {
+          alert('Invalid JSON file');
+          console.error('Import failed', err);
+        } finally {
+          importFile.value = '';
+        }
+      };
+      reader.readAsText(file);
     }
 
     function render(filter = '') {
@@ -251,6 +296,10 @@
         saveToLocalStorage();
         render(searchBox.value.trim());
       });
+
+      exportBtn.addEventListener('click', exportData);
+      importBtn.addEventListener('click', () => importFile.click());
+      importFile.addEventListener('change', importData);
 
     }
 
