@@ -56,7 +56,7 @@ export default function ItemMenu({ onMove, onDelete }) {
         onClick={() => setOpen((o) => !o)}
         ref={buttonRef}
       >
-        \u22ee
+        {'\u22ee'}
       </button>
       {open && (
         <div className="item-menu" ref={menuRef} onKeyDown={handleKeyNav}>

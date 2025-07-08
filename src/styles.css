@@ -182,11 +182,13 @@ li:hover {
   right: 0;
   margin-top: 0.2rem;
   background: #1e1e1e;
+  background-color: #1e1e1e;
   border: 1px solid #333;
   border-radius: 0.3rem;
   display: flex;
   flex-direction: column;
-  z-index: 5;
+  min-width: max-content;
+  z-index: 100;
 }
 .item-menu button {
   background: none;
@@ -195,6 +197,7 @@ li:hover {
   padding: 0.3rem 0.6rem;
   text-align: left;
   cursor: pointer;
+  white-space: nowrap;
 }
 .item-menu button:hover,
 .item-menu button:focus {
