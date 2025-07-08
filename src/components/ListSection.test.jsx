@@ -91,4 +91,25 @@ describe('ListSection', () => {
     expect(dupLi.classList.contains('duplicate-item')).toBe(true);
     expect(otherLi.classList.contains('duplicate-item')).toBe(false);
   });
+
+  test('multiple duplicates all receive duplicate-item class', () => {
+    const { getByText } = render(
+      <ListSection
+        title="Wishlist"
+        items={["A", "B", "C"]}
+        onMove={() => {}}
+        onDelete={() => {}}
+        onAdd={() => {}}
+        placeholder="Add item"
+        filter=""
+        duplicates={new Set(["a", "c"])}
+      />
+    );
+    const aLi = getByText('A').closest('li');
+    const bLi = getByText('B').closest('li');
+    const cLi = getByText('C').closest('li');
+    expect(aLi.classList.contains('duplicate-item')).toBe(true);
+    expect(cLi.classList.contains('duplicate-item')).toBe(true);
+    expect(bLi.classList.contains('duplicate-item')).toBe(false);
+  });
 });
