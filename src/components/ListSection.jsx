@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { highlightMatch } from '../utils';
 
 export default function ListSection({
   title,
@@ -29,11 +30,6 @@ export default function ListSection({
     .map((t, i) => ({ t, i }))
     .filter((o) => !normFilter || o.t.toLowerCase().includes(normFilter));
 
-  const highlightMatch = (text) => {
-    if (!normFilter) return text;
-    const regex = new RegExp(`(${normFilter.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
-    return text.replace(regex, '<span class="match-highlight">$1</span>');
-  };
 
   return (
     <div className="list-section">
@@ -49,7 +45,7 @@ export default function ListSection({
               key={o.i}
               className={`${title.toLowerCase()}-item`}
               onClick={(e) => onItemClick(o.i, e.altKey)}
-              dangerouslySetInnerHTML={{ __html: highlightMatch(o.t) }}
+              dangerouslySetInnerHTML={{ __html: highlightMatch(o.t, normFilter) }}
             />
           ))
         )}
