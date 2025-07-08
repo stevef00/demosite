@@ -185,8 +185,9 @@ export default function App() {
     <div>
       <h1>DVD Collection Tracker</h1>
       <p className="search-info">
-        Use the Move button to transfer a title between lists. Use Delete to
-        remove it.
+        Use the Move button to send a title to the other list or Delete to
+        remove it. A confirmation dialog will appear before either action is
+        applied.
       </p>
       <div className="search-container">
         <input
