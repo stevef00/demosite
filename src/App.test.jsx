@@ -36,3 +36,14 @@ test('delete shows confirmation and removes item on confirm', () => {
   const ownedItems = container.querySelectorAll('.owned-item');
   expect(ownedItems.length).toBe(0);
 });
+
+test('moving owned item adds it once to wishlist', () => {
+  const { container } = renderWithData({ owned: ['C'], wishlist: [] });
+  const moveBtn = container.querySelector('.owned-item .move-button');
+  fireEvent.click(moveBtn);
+  expect(screen.getByText('Move this title back to wishlist?')).toBeInTheDocument();
+  fireEvent.click(screen.getByText('Yes'));
+  const wishlistItems = container.querySelectorAll('.wishlist-item');
+  expect(wishlistItems.length).toBe(1);
+  expect(wishlistItems[0].textContent).toContain('C');
+});

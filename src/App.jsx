@@ -75,16 +75,12 @@ export default function App() {
 
   const moveFromWishlist = (idx) => {
     requestConfirm('Move this title to owned?', () => {
-      setWishlist((w) => {
-        const newW = [...w];
-        const [item] = newW.splice(idx, 1);
-        setOwned((o) => {
-          const newO = [...o, item];
-          saveToLocalStorage(newO, newW);
-          return newO;
-        });
-        return newW;
-      });
+      const item = wishlist[idx];
+      const newW = wishlist.filter((_, i) => i !== idx);
+      const newO = [...owned, item];
+      setWishlist(newW);
+      setOwned(newO);
+      saveToLocalStorage(newO, newW);
     });
   };
 
@@ -101,16 +97,12 @@ export default function App() {
 
   const moveFromOwned = (idx) => {
     requestConfirm('Move this title back to wishlist?', () => {
-      setOwned((o) => {
-        const newO = [...o];
-        const [item] = newO.splice(idx, 1);
-        setWishlist((w) => {
-          const newW = [...w, item];
-          saveToLocalStorage(newO, newW);
-          return newW;
-        });
-        return newO;
-      });
+      const item = owned[idx];
+      const newO = owned.filter((_, i) => i !== idx);
+      const newW = [...wishlist, item];
+      setOwned(newO);
+      setWishlist(newW);
+      saveToLocalStorage(newO, newW);
     });
   };
 
