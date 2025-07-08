@@ -22,6 +22,16 @@ This project has been converted to use the React framework with Vite.
    npm run build
    ```
 
+## Testing
+
+Unit tests use Jest and React Testing Library.
+
+Run the test suite with:
+
+```bash
+npm test
+```
+
 ## Features
 
 - Manage owned and wishlist DVD lists.
