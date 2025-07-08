@@ -86,3 +86,11 @@ test('adding to owned keeps items sorted', () => {
   const ownedTitles = Array.from(container.querySelectorAll('.owned-item span')).map((el) => el.textContent);
   expect(ownedTitles).toEqual(['A', 'B']);
 });
+
+test('items in both lists get duplicate-item class', () => {
+  const { container } = renderWithData({ owned: ['A'], wishlist: ['a'] });
+  const wishLi = container.querySelector('.wishlist-item');
+  const ownLi = container.querySelector('.owned-item');
+  expect(wishLi.classList.contains('duplicate-item')).toBe(true);
+  expect(ownLi.classList.contains('duplicate-item')).toBe(true);
+});

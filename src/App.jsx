@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useMemo } from 'react';
 import ListSection from './components/ListSection';
 import ConfirmDialog from './components/ConfirmDialog';
 import { sortTitles } from './utils';
@@ -10,6 +10,16 @@ export default function App() {
   const [lastModified, setLastModified] = useState('');
   const importRef = useRef(null);
   const [confirmState, setConfirmState] = useState(null);
+
+  const duplicates = useMemo(() => {
+    const ownedSet = new Set(owned.map((t) => t.toLowerCase()));
+    const wishSet = new Set(wishlist.map((t) => t.toLowerCase()));
+    const dup = new Set();
+    ownedSet.forEach((t) => {
+      if (wishSet.has(t)) dup.add(t);
+    });
+    return dup;
+  }, [owned, wishlist]);
 
   useEffect(() => {
     loadData();
@@ -218,6 +228,7 @@ export default function App() {
         onAdd={addWishlist}
         placeholder="Add to wishlist"
         filter={filter}
+        duplicates={duplicates}
       />
       <ListSection
         title="Owned"
@@ -227,6 +238,7 @@ export default function App() {
         onAdd={addOwned}
         placeholder="Add to owned"
         filter={filter}
+        duplicates={duplicates}
       />
       <div className="storage-buttons">
         <button onClick={exportData}>Export</button>

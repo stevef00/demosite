@@ -9,6 +9,7 @@ export default function ListSection({
   onDelete = () => {},
   placeholder,
   filter,
+  duplicates = new Set(),
 }) {
   const [input, setInput] = useState('');
 
@@ -44,7 +45,9 @@ export default function ListSection({
           matches.map((o) => (
             <li
               key={o.i}
-              className={`${title.toLowerCase()}-item`}
+              className={`${title.toLowerCase()}-item${
+                duplicates.has(o.t.toLowerCase()) ? ' duplicate-item' : ''
+              }`}
             >
               <span
                 dangerouslySetInnerHTML={{

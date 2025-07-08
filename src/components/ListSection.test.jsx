@@ -72,4 +72,23 @@ describe('ListSection', () => {
     fireEvent.click(getByLabelText('Delete'));
     expect(onDelete).toHaveBeenCalledWith(0);
   });
+
+  test('adds duplicate-item class when title is duplicate', () => {
+    const { getByText } = render(
+      <ListSection
+        title="Wishlist"
+        items={["A", "B"]}
+        onMove={() => {}}
+        onDelete={() => {}}
+        onAdd={() => {}}
+        placeholder="Add item"
+        filter=""
+        duplicates={new Set(["a"])}
+      />
+    );
+    const dupLi = getByText('A').closest('li');
+    const otherLi = getByText('B').closest('li');
+    expect(dupLi.classList.contains('duplicate-item')).toBe(true);
+    expect(otherLi.classList.contains('duplicate-item')).toBe(false);
+  });
 });
