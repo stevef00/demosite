@@ -59,36 +59,46 @@ export default function App() {
     }
   }
 
-  const moveFromWishlist = (idx, alt) => {
+  const moveFromWishlist = (idx) => {
     setWishlist((w) => {
       const newW = [...w];
       const [item] = newW.splice(idx, 1);
-      if (!alt) {
-        setOwned((o) => {
-          const newO = [...o, item];
-          saveToLocalStorage(newO, newW);
-          return newO;
-        });
-      } else {
-        saveToLocalStorage(owned, newW);
-      }
+      setOwned((o) => {
+        const newO = [...o, item];
+        saveToLocalStorage(newO, newW);
+        return newO;
+      });
       return newW;
     });
   };
 
-  const moveFromOwned = (idx, alt) => {
+  const deleteFromWishlist = (idx) => {
+    setWishlist((w) => {
+      const newW = [...w];
+      newW.splice(idx, 1);
+      saveToLocalStorage(owned, newW);
+      return newW;
+    });
+  };
+
+  const moveFromOwned = (idx) => {
     setOwned((o) => {
       const newO = [...o];
       const [item] = newO.splice(idx, 1);
-      if (!alt) {
-        setWishlist((w) => {
-          const newW = [...w, item];
-          saveToLocalStorage(newO, newW);
-          return newW;
-        });
-      } else {
-        saveToLocalStorage(newO, wishlist);
-      }
+      setWishlist((w) => {
+        const newW = [...w, item];
+        saveToLocalStorage(newO, newW);
+        return newW;
+      });
+      return newO;
+    });
+  };
+
+  const deleteFromOwned = (idx) => {
+    setOwned((o) => {
+      const newO = [...o];
+      newO.splice(idx, 1);
+      saveToLocalStorage(newO, wishlist);
       return newO;
     });
   };
@@ -153,7 +163,8 @@ export default function App() {
     <div>
       <h1>DVD Collection Tracker</h1>
       <p className="search-info">
-        Click a title to move it between lists. Alt-click to delete it.
+        Click a title to move it between lists. Use the Delete button to remove
+        it.
       </p>
       <div className="search-container">
         <input
@@ -180,6 +191,7 @@ export default function App() {
         title="Wishlist"
         items={wishlist}
         onItemClick={moveFromWishlist}
+        onDelete={deleteFromWishlist}
         onAdd={addWishlist}
         placeholder="Add to wishlist"
         filter={filter}
@@ -188,6 +200,7 @@ export default function App() {
         title="Owned"
         items={owned}
         onItemClick={moveFromOwned}
+        onDelete={deleteFromOwned}
         onAdd={addOwned}
         placeholder="Add to owned"
         filter={filter}

@@ -145,6 +145,17 @@ li {
 li:hover {
   background: #1a1a1a;
 }
+.delete-button {
+  background: transparent;
+  border: none;
+  color: #888;
+  cursor: pointer;
+  padding: 0 0.3rem;
+  float: right;
+}
+.delete-button:hover {
+  color: #fff;
+}
 .wishlist-item {
   border-left: 3px solid var(--wishlist);
   padding-left: 0.8rem;
