@@ -120,3 +120,40 @@ test('duplicate add does not add when cancelled', () => {
   const wishItems = container.querySelectorAll('.wishlist-item span');
   expect(wishItems.length).toBe(0);
 });
+
+test('duplicate add highlights items on confirm', () => {
+  const { container, getByPlaceholderText } = renderWithData({ owned: ['A'], wishlist: [] });
+  const input = getByPlaceholderText('Add to wishlist');
+  fireEvent.change(input, { target: { value: 'a' } });
+  const addBtn = input.parentElement.querySelector('button');
+  fireEvent.click(addBtn);
+  expect(screen.getByText('Title already exists—add anyway?')).toBeInTheDocument();
+  fireEvent.click(screen.getByText('Yes'));
+  const wishLi = container.querySelector('.wishlist-item');
+  const ownLi = container.querySelector('.owned-item');
+  expect(wishLi.classList.contains('duplicate-item')).toBe(true);
+  expect(ownLi.classList.contains('duplicate-item')).toBe(true);
+});
+
+test('moving from wishlist keeps both lists sorted', () => {
+  const { container } = renderWithData({ owned: ['A', 'C'], wishlist: ['B', 'D'] });
+  fireEvent.click(container.querySelector('.wishlist-item .move-button'));
+  expect(screen.getByText('Move this title to owned?')).toBeInTheDocument();
+  fireEvent.click(screen.getByText('Yes'));
+  const ownedTitles = Array.from(container.querySelectorAll('.owned-item span')).map((el) => el.textContent);
+  const wishlistTitles = Array.from(container.querySelectorAll('.wishlist-item span')).map((el) => el.textContent);
+  expect(ownedTitles).toEqual(['A', 'B', 'C']);
+  expect(wishlistTitles).toEqual(['D']);
+});
+
+test('moving from owned keeps both lists sorted', () => {
+  const { container } = renderWithData({ owned: ['A', 'C', 'E'], wishlist: ['B', 'D'] });
+  const moveBtn = container.querySelectorAll('.owned-item .move-button')[1];
+  fireEvent.click(moveBtn);
+  expect(screen.getByText('Move this title back to wishlist?')).toBeInTheDocument();
+  fireEvent.click(screen.getByText('Yes'));
+  const ownedTitles = Array.from(container.querySelectorAll('.owned-item span')).map((el) => el.textContent);
+  const wishlistTitles = Array.from(container.querySelectorAll('.wishlist-item span')).map((el) => el.textContent);
+  expect(ownedTitles).toEqual(['A', 'E']);
+  expect(wishlistTitles).toEqual(['B', 'C', 'D']);
+});
