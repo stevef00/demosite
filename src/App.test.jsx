@@ -7,6 +7,11 @@ test('renders heading', () => {
   expect(screen.getByText(/DVD Collection Tracker/i)).toBeInTheDocument();
 });
 
+test('search input has aria-label', () => {
+  render(<App />);
+  expect(screen.getByLabelText('Search titles')).toBeInTheDocument();
+});
+
 afterEach(() => {
   localStorage.clear();
 });
