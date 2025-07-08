@@ -166,6 +166,7 @@ li:hover {
   right: 0.2rem;
   top: 50%;
   transform: translateY(-50%);
+  z-index: 1000;
 }
 .item-menu-button {
   background: transparent;
@@ -180,7 +181,7 @@ li:hover {
 .item-menu {
   position: absolute;
   right: 0;
-  margin-top: 0.2rem;
+  top: calc(100% + 0.2rem);
   background: #1e1e1e;
   background-color: #1e1e1e;
   border: 1px solid #333;
@@ -188,7 +189,7 @@ li:hover {
   display: flex;
   flex-direction: column;
   min-width: max-content;
-  z-index: 100;
+  z-index: 1001;
 }
 .item-menu button {
   background: none;
