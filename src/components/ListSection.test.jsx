@@ -2,10 +2,7 @@ import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
 import ListSection from './ListSection';
 
-// Skipping these tests because the project does not include a DOM environment
-// such as jsdom. They rely on DOM APIs which are unavailable in this
-// restricted environment.
-describe.skip('ListSection', () => {
+describe('ListSection', () => {
   test('calls onAdd when Add button clicked', () => {
     const onAdd = jest.fn();
     const { getByPlaceholderText, getByText } = render(
@@ -38,5 +35,39 @@ describe.skip('ListSection', () => {
     );
     expect(queryByText('Star Wars')).toBeNull();
     expect(queryByText('Toy Story')).toBeInTheDocument();
+  });
+
+  test('calls onMove when Move button clicked', () => {
+    const onMove = jest.fn();
+    const { getAllByLabelText } = render(
+      <ListSection
+        title="Wishlist"
+        items={['A']}
+        onMove={onMove}
+        onDelete={() => {}}
+        onAdd={() => {}}
+        placeholder="Add item"
+        filter=""
+      />
+    );
+    fireEvent.click(getAllByLabelText('Move')[0]);
+    expect(onMove).toHaveBeenCalledWith(0);
+  });
+
+  test('calls onDelete when Delete button clicked', () => {
+    const onDelete = jest.fn();
+    const { getAllByLabelText } = render(
+      <ListSection
+        title="Wishlist"
+        items={['A']}
+        onMove={() => {}}
+        onDelete={onDelete}
+        onAdd={() => {}}
+        placeholder="Add item"
+        filter=""
+      />
+    );
+    fireEvent.click(getAllByLabelText('Delete')[0]);
+    expect(onDelete).toHaveBeenCalledWith(0);
   });
 });
