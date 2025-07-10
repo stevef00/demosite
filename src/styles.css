@@ -23,6 +23,25 @@ h1 {
   letter-spacing: 0.05em;
   text-align: center;
 }
+header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+.add-button {
+  background: var(--accent);
+  color: var(--bg);
+  border: none;
+  border-radius: 0.3rem;
+  padding: 0 0.6rem;
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+.add-button:hover {
+  background: #0298c4;
+}
 .search-container {
   width: 100%;
   max-width: 30rem;
@@ -57,31 +76,6 @@ h1 {
 }
 .clear-search-button.visible {
   display: inline-block;
-}
-.add-form {
-  margin-top: 0.5rem;
-  display: flex;
-  gap: 0.5rem;
-}
-.add-form input {
-  flex: 1;
-  padding: 0.4rem 0.6rem;
-  border: none;
-  border-radius: 0.3rem;
-  background: #1e1e1e;
-  color: var(--fg);
-}
-.add-form button {
-  background: var(--accent);
-  color: var(--bg);
-  border: none;
-  border-radius: 0.3rem;
-  padding: 0.4rem 0.8rem;
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-.add-form button:hover {
-  background: #0298c4;
 }
 
 .storage-buttons {
@@ -145,6 +139,71 @@ li {
 li:hover {
   background: #1a1a1a;
 }
+.delete-button {
+  background: transparent;
+  border: none;
+  color: #888;
+  cursor: pointer;
+  padding: 0 0.3rem;
+  float: right;
+}
+.delete-button:hover {
+  color: #fff;
+}
+.move-button {
+  background: transparent;
+  border: none;
+  color: #888;
+  cursor: pointer;
+  padding: 0 0.3rem;
+  float: right;
+}
+.move-button:hover {
+  color: #fff;
+}
+.item-menu-wrapper {
+  position: absolute;
+  right: 0.2rem;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 1000;
+}
+.item-menu-button {
+  background: transparent;
+  border: none;
+  color: #888;
+  cursor: pointer;
+  padding: 0 0.3rem;
+}
+.item-menu-button:hover {
+  color: #fff;
+}
+.item-menu {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 0.2rem);
+  background: #1e1e1e;
+  background-color: #1e1e1e;
+  border: 1px solid #333;
+  border-radius: 0.3rem;
+  display: flex;
+  flex-direction: column;
+  min-width: max-content;
+  z-index: 1001;
+}
+.item-menu button {
+  background: none;
+  border: none;
+  color: var(--fg);
+  padding: 0.3rem 0.6rem;
+  text-align: left;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.item-menu button:hover,
+.item-menu button:focus {
+  background: #333;
+}
 .wishlist-item {
   border-left: 3px solid var(--wishlist);
   padding-left: 0.8rem;
@@ -153,6 +212,9 @@ li:hover {
   border-left: 3px solid var(--owned);
   padding-left: 0.8rem;
   opacity: 0.7;
+}
+.duplicate-item {
+  outline: 2px solid var(--accent);
 }
 .match-highlight {
   background: var(--accent);
@@ -201,4 +263,61 @@ footer p {
   h1 { font-size: 1.3rem; }
   .list-section h2 { font-size: 1.1rem; }
   li { padding: 0.5rem 0.3rem; font-size: 0.9rem; }
+  .move-button,
+  .delete-button {
+    font-size: 1rem;
+  }
+  .item-menu-button {
+    font-size: 1rem;
+  }
+}
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal {
+  background: #1e1e1e;
+  padding: 1rem;
+  border-radius: 0.3rem;
+  max-width: 20rem;
+  text-align: center;
+}
+.add-dialog input,
+.add-dialog select {
+  width: 100%;
+  margin-bottom: 0.5rem;
+  padding: 0.4rem 0.6rem;
+  border: none;
+  border-radius: 0.3rem;
+  background: #1e1e1e;
+  color: var(--fg);
+}
+
+.modal-buttons {
+  margin-top: 1rem;
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+}
+
+.modal-buttons button {
+  background: var(--accent);
+  color: var(--bg);
+  border: none;
+  border-radius: 0.3rem;
+  padding: 0.4rem 0.8rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.modal-buttons button:hover {
+  background: #0298c4;
 }
