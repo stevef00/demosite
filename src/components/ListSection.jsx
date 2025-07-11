@@ -33,11 +33,7 @@ export default function ListSection({
                 duplicates.has(o.t.title.toLowerCase()) ? ' duplicate-item' : ''
               }`}
             >
-              <span
-                dangerouslySetInnerHTML={{
-                  __html: highlightMatch(o.t.title, normFilter),
-                }}
-              />
+              <span>{highlightMatch(o.t.title, normFilter)}</span>
               <ItemMenu
                 onMove={() => onMove(o.i)}
                 onDelete={() => onDelete(o.i)}
