@@ -1,11 +1,17 @@
+import React from 'react';
+import { render } from '@testing-library/react';
 import { highlightMatch, addItem } from './utils';
 
 test('highlightMatch returns text when filter is empty', () => {
-  expect(highlightMatch('Hello', '')).toBe('Hello');
+  const { container } = render(<div>{highlightMatch('Hello', '')}</div>);
+  expect(container.textContent).toBe('Hello');
 });
 
 test('highlightMatch wraps matches', () => {
-  expect(highlightMatch('Hello', 'he')).toBe('<span class="match-highlight">He</span>llo');
+  const { container } = render(<div>{highlightMatch('Hello', 'he')}</div>);
+  const span = container.querySelector('.match-highlight');
+  expect(span).toBeInTheDocument();
+  expect(span.textContent).toBe('He');
 });
 
 test('addItem sorts and reports duplicates', () => {

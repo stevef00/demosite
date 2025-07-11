@@ -1,7 +1,20 @@
+import React from 'react';
+
 export function highlightMatch(text, filter) {
-  if (!filter) return text;
-  const regex = new RegExp(`(${filter.replace(/[.*+?^${}()|[\\]\\]/g, '\\$&')})`, 'gi');
-  return text.replace(regex, '<span class="match-highlight">$1</span>');
+  if (!filter) return [text];
+  const regex = new RegExp(
+    `(${filter.replace(/[.*+?^${}()|[\\]\\]/g, "\\$&")})`,
+    "gi"
+  );
+  return text.split(regex).map((part, idx) =>
+    idx % 2 === 1
+      ? React.createElement(
+          "span",
+          { key: idx, className: "match-highlight" },
+          part
+        )
+      : part
+  );
 }
 
 export function sortTitles(list) {

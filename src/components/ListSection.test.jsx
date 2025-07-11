@@ -97,4 +97,22 @@ describe('ListSection', () => {
     expect(cLi.classList.contains('duplicate-item')).toBe(true);
     expect(bLi.classList.contains('duplicate-item')).toBe(false);
   });
+
+  test('titles containing HTML are rendered safely', () => {
+    const { container } = render(
+      <ListSection
+        title="Wishlist"
+        items={[{ id: '1', title: '<b>Danger</b>' }]}
+        onMove={() => {}}
+        onDelete={() => {}}
+        filter="danger"
+      />
+    );
+    const textSpan = container.querySelector('li span');
+    expect(textSpan.textContent).toBe('<b>Danger</b>');
+    expect(textSpan.querySelector('b')).toBeNull();
+    const highlight = textSpan.querySelector('.match-highlight');
+    expect(highlight).toBeInTheDocument();
+    expect(highlight.textContent).toBe('Danger');
+  });
 });
