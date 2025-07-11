@@ -53,6 +53,5 @@ list.
 ## Project Structure
 
 - `src/` – React source files
-- `dvd_data.json` – initial data
 - `index.html` – entry point served by Vite
 

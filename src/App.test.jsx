@@ -20,7 +20,6 @@ afterEach(() => {
 
 function renderWithData(data) {
   localStorage.setItem('dvdData', JSON.stringify(data));
-  localStorage.setItem('dvdDataTimestamp', Date.now().toString());
   return render(<App />);
 }
 
