@@ -2,13 +2,19 @@ import { sortTitles, addItem as computeAddItem } from './utils';
 
 const KEY = 'dvdData';
 
+function normalize(list) {
+  return (list || []).map((item) =>
+    typeof item === 'string' ? { id: crypto.randomUUID(), title: item } : item
+  );
+}
+
 function loadFromLocalStorage() {
   const cached = localStorage.getItem(KEY);
   if (!cached) return null;
   try {
     const parsed = JSON.parse(cached);
-    const owned = sortTitles(parsed.owned || []);
-    const wishlist = sortTitles(parsed.wishlist || []);
+    const owned = sortTitles(normalize(parsed.owned));
+    const wishlist = sortTitles(normalize(parsed.wishlist));
     saveToLocalStorage(owned, wishlist);
     return { owned, wishlist };
   } catch (err) {
