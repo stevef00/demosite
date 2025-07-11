@@ -8,7 +8,10 @@ describe('ListSection', () => {
     const { queryByText } = render(
       <ListSection
         title="Wishlist"
-        items={['Star Wars', 'Toy Story']}
+        items={[
+          { id: '1', title: 'Star Wars' },
+          { id: '2', title: 'Toy Story' },
+        ]}
         onMove={() => {}}
         onDelete={() => {}}
         filter="toy"
@@ -25,7 +28,7 @@ describe('ListSection', () => {
     const { getByLabelText, getByText } = render(
       <ListSection
         title="Wishlist"
-        items={["A"]}
+        items={[{ id: '1', title: 'A' }]}
         onMove={onMove}
         onDelete={() => {}}
         filter=""
@@ -41,7 +44,7 @@ describe('ListSection', () => {
     const { getByLabelText, getByText } = render(
       <ListSection
         title="Wishlist"
-        items={["A"]}
+        items={[{ id: '1', title: 'A' }]}
         onMove={() => {}}
         onDelete={onDelete}
         filter=""
@@ -56,7 +59,10 @@ describe('ListSection', () => {
     const { getByText } = render(
       <ListSection
         title="Wishlist"
-        items={["A", "B"]}
+        items={[
+          { id: '1', title: 'A' },
+          { id: '2', title: 'B' },
+        ]}
         onMove={() => {}}
         onDelete={() => {}}
         filter=""
@@ -73,7 +79,11 @@ describe('ListSection', () => {
     const { getByText } = render(
       <ListSection
         title="Wishlist"
-        items={["A", "B", "C"]}
+        items={[
+          { id: '1', title: 'A' },
+          { id: '2', title: 'B' },
+          { id: '3', title: 'C' },
+        ]}
         onMove={() => {}}
         onDelete={() => {}}
         filter=""

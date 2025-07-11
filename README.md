@@ -38,6 +38,7 @@ npm test
 - Search, add, move and delete titles using the on-page controls.
 - Import/export collection data as JSON.
 - Data persists in `localStorage`.
+- Each movie is stored as an object with a unique `id` and `title`.
 
 ## Managing Titles
 

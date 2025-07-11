@@ -9,9 +9,9 @@ test('highlightMatch wraps matches', () => {
 });
 
 test('addItem sorts and reports duplicates', () => {
-  const result = addItem('wishlist', 'B', [], ['A']);
-  expect(result.wishlist).toEqual(['A', 'B']);
+  const result = addItem('wishlist', 'B', [], [{ id: '1', title: 'A' }]);
+  expect(result.wishlist.map((i) => i.title)).toEqual(['A', 'B']);
   expect(result.duplicate).toBe(false);
-  const dup = addItem('owned', 'a', ['A'], []);
+  const dup = addItem('owned', 'a', [{ id: '2', title: 'A' }], []);
   expect(dup.duplicate).toBe(true);
 });

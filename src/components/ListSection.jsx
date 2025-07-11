@@ -14,7 +14,7 @@ export default function ListSection({
   const normFilter = filter.toLowerCase();
   const matches = items
     .map((t, i) => ({ t, i }))
-    .filter((o) => !normFilter || o.t.toLowerCase().includes(normFilter));
+    .filter((o) => !normFilter || o.t.title.toLowerCase().includes(normFilter));
 
 
   return (
@@ -28,14 +28,14 @@ export default function ListSection({
         ) : (
           matches.map((o) => (
             <li
-              key={o.i}
+              key={o.t.id}
               className={`${title.toLowerCase()}-item${
-                duplicates.has(o.t.toLowerCase()) ? ' duplicate-item' : ''
+                duplicates.has(o.t.title.toLowerCase()) ? ' duplicate-item' : ''
               }`}
             >
               <span
                 dangerouslySetInnerHTML={{
-                  __html: highlightMatch(o.t, normFilter),
+                  __html: highlightMatch(o.t.title, normFilter),
                 }}
               />
               <ItemMenu

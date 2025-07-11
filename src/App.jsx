@@ -21,8 +21,8 @@ export default function App() {
   const [addDialogOpen, setAddDialogOpen] = useState(false);
 
   const duplicates = useMemo(() => {
-    const ownedSet = new Set(owned.map((t) => t.toLowerCase()));
-    const wishSet = new Set(wishlist.map((t) => t.toLowerCase()));
+    const ownedSet = new Set(owned.map((t) => t.title.toLowerCase()));
+    const wishSet = new Set(wishlist.map((t) => t.title.toLowerCase()));
     const dup = new Set();
     ownedSet.forEach((t) => {
       if (wishSet.has(t)) dup.add(t);
@@ -145,8 +145,12 @@ export default function App() {
         if (!parsed || !Array.isArray(parsed.owned) || !Array.isArray(parsed.wishlist)) {
           throw new Error('Invalid format');
         }
-        const sortedO = sortTitles(parsed.owned);
-        const sortedW = sortTitles(parsed.wishlist);
+        const normalize = (list) =>
+          list.map((item) =>
+            typeof item === 'string' ? { id: crypto.randomUUID(), title: item } : item
+          );
+        const sortedO = sortTitles(normalize(parsed.owned));
+        const sortedW = sortTitles(normalize(parsed.wishlist));
         setOwned(sortedO);
         setWishlist(sortedW);
         saveCollection(sortedO, sortedW);
@@ -185,8 +189,12 @@ export default function App() {
         <div className="search-info" id="searchInfo">
           {filter
             ? `Found ${
-                wishlist.filter((t) => t.toLowerCase().includes(filter.toLowerCase())).length +
-                owned.filter((t) => t.toLowerCase().includes(filter.toLowerCase())).length
+                wishlist.filter((t) =>
+                  t.title.toLowerCase().includes(filter.toLowerCase())
+                ).length +
+                owned.filter((t) =>
+                  t.title.toLowerCase().includes(filter.toLowerCase())
+                ).length
               } matches`
             : 'Type to search both lists'}
         </div>

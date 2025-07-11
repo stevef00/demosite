@@ -24,7 +24,7 @@ function renderWithData(data) {
 }
 
 test('move shows confirmation and moves item on confirm', () => {
-  const { container } = renderWithData({ owned: [], wishlist: ['A'] });
+  const { container } = renderWithData({ owned: [], wishlist: [{ id: '1', title: 'A' }] });
   fireEvent.click(screen.getByLabelText('Actions'));
   fireEvent.click(screen.getByText('Move'));
   expect(screen.getByText('Move this title to owned?')).toBeInTheDocument();
@@ -36,7 +36,7 @@ test('move shows confirmation and moves item on confirm', () => {
 });
 
 test('delete shows confirmation and removes item on confirm', () => {
-  const { container } = renderWithData({ owned: ['B'], wishlist: [] });
+  const { container } = renderWithData({ owned: [{ id: '1', title: 'B' }], wishlist: [] });
   fireEvent.click(screen.getByLabelText('Actions'));
   fireEvent.click(screen.getByText('Delete'));
   expect(screen.getByText('Are you sure you want to delete this title?')).toBeInTheDocument();
@@ -46,7 +46,7 @@ test('delete shows confirmation and removes item on confirm', () => {
 });
 
 test('moving owned item adds it once to wishlist', () => {
-  const { container } = renderWithData({ owned: ['C'], wishlist: [] });
+  const { container } = renderWithData({ owned: [{ id: '1', title: 'C' }], wishlist: [] });
   const moveBtn = container.querySelector('.owned-item .item-menu-button');
   fireEvent.click(moveBtn);
   fireEvent.click(screen.getByText('Move'));
@@ -58,7 +58,7 @@ test('moving owned item adds it once to wishlist', () => {
 });
 
 test('adding to wishlist keeps items sorted', () => {
-  const { container } = renderWithData({ owned: [], wishlist: ['B'] });
+  const { container } = renderWithData({ owned: [], wishlist: [{ id: '1', title: 'B' }] });
   fireEvent.click(screen.getByLabelText('Add'));
   fireEvent.change(screen.getByPlaceholderText('Title'), { target: { value: 'A' } });
   fireEvent.click(screen.getByText('Add'));
@@ -67,7 +67,7 @@ test('adding to wishlist keeps items sorted', () => {
 });
 
 test('moving from wishlist sorts owned list', () => {
-  const { container } = renderWithData({ owned: ['C'], wishlist: ['A'] });
+  const { container } = renderWithData({ owned: [{ id: '2', title: 'C' }], wishlist: [{ id: '1', title: 'A' }] });
   const menuBtn = container.querySelector('.wishlist-item .item-menu-button');
   fireEvent.click(menuBtn);
   fireEvent.click(screen.getByText('Move'));
@@ -78,7 +78,7 @@ test('moving from wishlist sorts owned list', () => {
 });
 
 test('moving from owned keeps wishlist sorted', () => {
-  const { container } = renderWithData({ owned: ['B'], wishlist: ['A'] });
+  const { container } = renderWithData({ owned: [{ id: '1', title: 'B' }], wishlist: [{ id: '2', title: 'A' }] });
   const moveBtn = container.querySelector('.owned-item .item-menu-button');
   fireEvent.click(moveBtn);
   fireEvent.click(screen.getByText('Move'));
@@ -89,7 +89,7 @@ test('moving from owned keeps wishlist sorted', () => {
 });
 
 test('adding to owned keeps items sorted', () => {
-  const { container } = renderWithData({ owned: ['B'], wishlist: [] });
+  const { container } = renderWithData({ owned: [{ id: '1', title: 'B' }], wishlist: [] });
   fireEvent.click(screen.getByLabelText('Add'));
   fireEvent.change(screen.getByPlaceholderText('Title'), { target: { value: 'A' } });
   fireEvent.change(screen.getByLabelText('Target list'), { target: { value: 'owned' } });
@@ -99,7 +99,7 @@ test('adding to owned keeps items sorted', () => {
 });
 
 test('items in both lists get duplicate-item class', () => {
-  const { container } = renderWithData({ owned: ['A'], wishlist: ['a'] });
+  const { container } = renderWithData({ owned: [{ id: '1', title: 'A' }], wishlist: [{ id: '2', title: 'a' }] });
   const wishLi = container.querySelector('.wishlist-item');
   const ownLi = container.querySelector('.owned-item');
   expect(wishLi.classList.contains('duplicate-item')).toBe(true);
@@ -107,7 +107,7 @@ test('items in both lists get duplicate-item class', () => {
 });
 
 test('duplicate add shows confirmation and adds on confirm', () => {
-  const { container } = renderWithData({ owned: ['A'], wishlist: [] });
+  const { container } = renderWithData({ owned: [{ id: '1', title: 'A' }], wishlist: [] });
   fireEvent.click(screen.getByLabelText('Add'));
   fireEvent.change(screen.getByPlaceholderText('Title'), { target: { value: 'a' } });
   fireEvent.click(screen.getByText('Add'));
@@ -119,7 +119,7 @@ test('duplicate add shows confirmation and adds on confirm', () => {
 });
 
 test('duplicate add does not add when cancelled', () => {
-  const { container } = renderWithData({ owned: ['A'], wishlist: [] });
+  const { container } = renderWithData({ owned: [{ id: '1', title: 'A' }], wishlist: [] });
   fireEvent.click(screen.getByLabelText('Add'));
   fireEvent.change(screen.getByPlaceholderText('Title'), { target: { value: 'a' } });
   fireEvent.click(screen.getByText('Add'));
@@ -131,7 +131,7 @@ test('duplicate add does not add when cancelled', () => {
 });
 
 test('duplicate add highlights items on confirm', () => {
-  const { container } = renderWithData({ owned: ['A'], wishlist: [] });
+  const { container } = renderWithData({ owned: [{ id: '1', title: 'A' }], wishlist: [] });
   fireEvent.click(screen.getByLabelText('Add'));
   fireEvent.change(screen.getByPlaceholderText('Title'), { target: { value: 'a' } });
   fireEvent.click(screen.getByText('Add'));
@@ -144,7 +144,16 @@ test('duplicate add highlights items on confirm', () => {
 });
 
 test('moving from wishlist keeps both lists sorted', () => {
-  const { container } = renderWithData({ owned: ['A', 'C'], wishlist: ['B', 'D'] });
+  const { container } = renderWithData({
+    owned: [
+      { id: '1', title: 'A' },
+      { id: '3', title: 'C' }
+    ],
+    wishlist: [
+      { id: '2', title: 'B' },
+      { id: '4', title: 'D' }
+    ]
+  });
   const menuBtn = container.querySelector('.wishlist-item .item-menu-button');
   fireEvent.click(menuBtn);
   fireEvent.click(screen.getByText('Move'));
@@ -157,7 +166,17 @@ test('moving from wishlist keeps both lists sorted', () => {
 });
 
 test('moving from owned keeps both lists sorted', () => {
-  const { container } = renderWithData({ owned: ['A', 'C', 'E'], wishlist: ['B', 'D'] });
+  const { container } = renderWithData({
+    owned: [
+      { id: '1', title: 'A' },
+      { id: '3', title: 'C' },
+      { id: '5', title: 'E' }
+    ],
+    wishlist: [
+      { id: '2', title: 'B' },
+      { id: '4', title: 'D' }
+    ]
+  });
   const moveBtn = container.querySelectorAll('.owned-item .item-menu-button')[1];
   fireEvent.click(moveBtn);
   fireEvent.click(screen.getByText('Move'));

@@ -5,25 +5,27 @@ export function highlightMatch(text, filter) {
 }
 
 export function sortTitles(list) {
-  return [...list].sort((a, b) => a.localeCompare(b));
+  return [...list].sort((a, b) => a.title.localeCompare(b.title));
 }
 
 export function addItem(list, title, owned, wishlist) {
   const normalized = title.toLowerCase();
   const duplicate =
-    owned.some((t) => t.toLowerCase() === normalized) ||
-    wishlist.some((t) => t.toLowerCase() === normalized);
+    owned.some((t) => t.title.toLowerCase() === normalized) ||
+    wishlist.some((t) => t.title.toLowerCase() === normalized);
+
+  const item = { id: crypto.randomUUID(), title };
 
   if (list === 'wishlist') {
     return {
       owned: [...owned],
-      wishlist: sortTitles([...wishlist, title]),
+      wishlist: sortTitles([...wishlist, item]),
       duplicate,
     };
   }
 
   return {
-    owned: sortTitles([...owned, title]),
+    owned: sortTitles([...owned, item]),
     wishlist: [...wishlist],
     duplicate,
   };
