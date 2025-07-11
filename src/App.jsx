@@ -2,13 +2,19 @@ import React, { useEffect, useRef, useState, useMemo } from 'react';
 import ListSection from './components/ListSection';
 import ConfirmDialog from './components/ConfirmDialog';
 import AddDialog from './components/AddDialog';
-import { sortTitles, addItem as computeAddItem, getAccessUser } from './utils';
+import { sortTitles, getAccessUser } from './utils';
+import {
+  loadCollection,
+  saveCollection,
+  addItem as storageAddItem,
+  moveItem as storageMoveItem,
+  deleteItem as storageDeleteItem,
+} from './storage';
 
 export default function App() {
   const [owned, setOwned] = useState([]);
   const [wishlist, setWishlist] = useState([]);
   const [filter, setFilter] = useState('');
-  const [lastModified, setLastModified] = useState('');
   const [user, setUser] = useState(null);
   const importRef = useRef(null);
   const [confirmState, setConfirmState] = useState(null);
@@ -29,56 +35,11 @@ export default function App() {
     setUser(getAccessUser());
   }, []);
 
-  function loadFromLocalStorage() {
-    const cached = localStorage.getItem('dvdData');
-    if (cached) {
-      try {
-        const parsed = JSON.parse(cached);
-        const sortedO = sortTitles(parsed.owned || []);
-        const sortedW = sortTitles(parsed.wishlist || []);
-        setOwned(sortedO);
-        setWishlist(sortedW);
-        saveToLocalStorage(sortedO, sortedW);
-        const ts = localStorage.getItem('dvdDataTimestamp');
-        if (ts) {
-          const date = new Date(parseInt(ts, 10));
-          setLastModified(date.toLocaleString());
-        } else {
-          setLastModified('Local data');
-        }
-        return true;
-      } catch (err) {
-        console.error('Failed to parse cached data', err);
-        localStorage.removeItem('dvdData');
-        localStorage.removeItem('dvdDataTimestamp');
-      }
-    }
-    return false;
-  }
 
-  function saveToLocalStorage(o = owned, w = wishlist) {
-    localStorage.setItem('dvdData', JSON.stringify({ owned: o, wishlist: w }));
-    localStorage.setItem('dvdDataTimestamp', Date.now().toString());
-  }
-
-  async function loadData() {
-    if (loadFromLocalStorage()) return;
-
-    try {
-      const res = await fetch('dvd_data.json');
-      if (!res.ok) throw new Error(res.status);
-      const lm = res.headers.get('last-modified');
-      if (lm) setLastModified(new Date(lm).toLocaleString());
-      const json = await res.json();
-      const sortedO = sortTitles(json.owned || []);
-      const sortedW = sortTitles(json.wishlist || []);
-      setOwned(sortedO);
-      setWishlist(sortedW);
-      saveToLocalStorage(sortedO, sortedW);
-    } catch (err) {
-      console.error('Could not load dvd_data.json', err);
-      setLastModified('Error loading data');
-    }
+  function loadData() {
+    const { owned: o, wishlist: w } = loadCollection();
+    setOwned(o);
+    setWishlist(w);
   }
 
   const requestConfirm = (message, action) => {
@@ -95,63 +56,63 @@ export default function App() {
 
   const moveFromWishlist = (idx) => {
     requestConfirm('Move this title to owned?', () => {
-      const item = wishlist[idx];
-      const newW = sortTitles(wishlist.filter((_, i) => i !== idx));
-      const newO = sortTitles([...owned, item]);
+      const { owned: newO, wishlist: newW } = storageMoveItem(
+        'wishlist',
+        idx,
+        owned,
+        wishlist
+      );
       setWishlist(newW);
       setOwned(newO);
-      saveToLocalStorage(newO, newW);
     });
   };
 
   const deleteFromWishlist = (idx) => {
     requestConfirm('Are you sure you want to delete this title?', () => {
-      setWishlist((w) => {
-        const newW = [...w];
-        newW.splice(idx, 1);
-        saveToLocalStorage(owned, newW);
-        return newW;
-      });
+      const { owned: newO, wishlist: newW } = storageDeleteItem(
+        'wishlist',
+        idx,
+        owned,
+        wishlist
+      );
+      setOwned(newO);
+      setWishlist(newW);
     });
   };
 
   const moveFromOwned = (idx) => {
     requestConfirm('Move this title back to wishlist?', () => {
-      const item = owned[idx];
-      const newO = sortTitles(owned.filter((_, i) => i !== idx));
-      const newW = sortTitles([...wishlist, item]);
+      const { owned: newO, wishlist: newW } = storageMoveItem(
+        'owned',
+        idx,
+        owned,
+        wishlist
+      );
       setOwned(newO);
       setWishlist(newW);
-      saveToLocalStorage(newO, newW);
     });
   };
 
   const deleteFromOwned = (idx) => {
     requestConfirm('Are you sure you want to delete this title?', () => {
-      setOwned((o) => {
-        const newO = [...o];
-        newO.splice(idx, 1);
-        saveToLocalStorage(newO, wishlist);
-        return newO;
-      });
+      const { owned: newO, wishlist: newW } = storageDeleteItem(
+        'owned',
+        idx,
+        owned,
+        wishlist
+      );
+      setOwned(newO);
+      setWishlist(newW);
     });
   };
 
   const addItem = (list, title) => {
-    const { owned: newO, wishlist: newW, duplicate } = computeAddItem(
-      list,
-      title,
-      owned,
-      wishlist
-    );
-
+    const result = storageAddItem(list, title, owned, wishlist);
     const insert = () => {
-      setOwned(newO);
-      setWishlist(newW);
-      saveToLocalStorage(newO, newW);
+      setOwned(result.owned);
+      setWishlist(result.wishlist);
     };
-
-    if (duplicate) {
+    if (result.duplicate) {
       requestConfirm('Title already exists—add anyway?', insert);
     } else {
       insert();
@@ -188,8 +149,7 @@ export default function App() {
         const sortedW = sortTitles(parsed.wishlist);
         setOwned(sortedO);
         setWishlist(sortedW);
-        setLastModified(new Date().toLocaleString());
-        saveToLocalStorage(sortedO, sortedW);
+        saveCollection(sortedO, sortedW);
       } catch (err) {
         alert('Invalid JSON file');
         console.error('Import failed', err);
@@ -262,7 +222,6 @@ export default function App() {
         <button onClick={() => importRef.current && importRef.current.click()}>Import</button>
       </div>
       <footer>
-        <p>Last modified: {lastModified || 'Loading...'}</p>
         {user && <p>Logged in as: {user}</p>}
       </footer>
       {addDialogOpen && (
