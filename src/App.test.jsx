@@ -14,6 +14,8 @@ test('search input has aria-label', () => {
 
 afterEach(() => {
   localStorage.clear();
+  document.cookie =
+    'CF_Authorization=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/';
 });
 
 function renderWithData(data) {
@@ -166,4 +168,11 @@ test('moving from owned keeps both lists sorted', () => {
   const wishlistTitles = Array.from(container.querySelectorAll('.wishlist-item span')).map((el) => el.textContent);
   expect(ownedTitles).toEqual(['A', 'E']);
   expect(wishlistTitles).toEqual(['B', 'C', 'D']);
+});
+
+test('shows user from Access cookie', () => {
+  const payload = btoa(JSON.stringify({ email: 'test@example.com' }));
+  document.cookie = `CF_Authorization=header.${payload}.sig`;
+  render(<App />);
+  expect(screen.getByText(/Logged in as:/)).toHaveTextContent('test@example.com');
 });

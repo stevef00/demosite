@@ -2,13 +2,14 @@ import React, { useEffect, useRef, useState, useMemo } from 'react';
 import ListSection from './components/ListSection';
 import ConfirmDialog from './components/ConfirmDialog';
 import AddDialog from './components/AddDialog';
-import { sortTitles, addItem as computeAddItem } from './utils';
+import { sortTitles, addItem as computeAddItem, getAccessUser } from './utils';
 
 export default function App() {
   const [owned, setOwned] = useState([]);
   const [wishlist, setWishlist] = useState([]);
   const [filter, setFilter] = useState('');
   const [lastModified, setLastModified] = useState('');
+  const [user, setUser] = useState(null);
   const importRef = useRef(null);
   const [confirmState, setConfirmState] = useState(null);
   const [addDialogOpen, setAddDialogOpen] = useState(false);
@@ -25,6 +26,7 @@ export default function App() {
 
   useEffect(() => {
     loadData();
+    setUser(getAccessUser());
   }, []);
 
   function loadFromLocalStorage() {
@@ -261,6 +263,7 @@ export default function App() {
       </div>
       <footer>
         <p>Last modified: {lastModified || 'Loading...'}</p>
+        {user && <p>Logged in as: {user}</p>}
       </footer>
       {addDialogOpen && (
         <AddDialog
