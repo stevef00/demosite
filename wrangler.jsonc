@@ -3,5 +3,12 @@
     "compatibility_date": "2025-07-10",
     "assets": {
         "directory": "./docs"
-    }
+    },
+    "d1_databases": [
+        {
+            "binding": "DB",
+            "database_id": "b3f5df05-8423-4828-b452-f3de640b7db5",
+            "database_name": "dvd-db"
+        }
+    ]
 }
