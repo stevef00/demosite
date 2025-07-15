@@ -15,6 +15,9 @@ export default {
       if (request.method === 'POST' && url.pathname === '/api/move') {
         return handleMove(request, env.DB, email);
       }
+      if (request.method === 'POST' && url.pathname === '/api/import') {
+        return handleImport(request, env.DB, email);
+      }
       if (request.method === 'DELETE' && url.pathname.startsWith('/api/item/')) {
         const id = url.pathname.split('/').pop();
         return handleDelete(env.DB, email, id);
@@ -76,6 +79,42 @@ async function handleMove(request, db, email) {
     .bind(to === 'owned' ? 1 : 0, id, email)
     .run();
   return new Response(null, { status: 204 });
+}
+
+async function handleImport(request, db, email) {
+  const { owned, wishlist } = await request.json();
+  if (!Array.isArray(owned) || !Array.isArray(wishlist)) {
+    return new Response('Bad Request', { status: 400 });
+  }
+
+  await db.prepare('DELETE FROM items WHERE user = ?').bind(email).run();
+
+  const insert = db.prepare(
+    'INSERT INTO items (id, title, owned, user) VALUES (?, ?, ?, ?)'
+  );
+
+  const savedOwned = [];
+  const savedWishlist = [];
+
+  for (const title of owned) {
+    if (typeof title !== 'string' || !title) {
+      return new Response('Bad Request', { status: 400 });
+    }
+    const id = crypto.randomUUID();
+    await insert.bind(id, title, 1, email).run();
+    savedOwned.push({ id, title });
+  }
+
+  for (const title of wishlist) {
+    if (typeof title !== 'string' || !title) {
+      return new Response('Bad Request', { status: 400 });
+    }
+    const id = crypto.randomUUID();
+    await insert.bind(id, title, 0, email).run();
+    savedWishlist.push({ id, title });
+  }
+
+  return json({ owned: savedOwned, wishlist: savedWishlist });
 }
 
 async function handleDelete(db, email, id) {
