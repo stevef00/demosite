@@ -159,17 +159,27 @@ export default function App() {
         }
         const normalizedOwned = normalize(parsed.owned);
         const normalizedWishlist = normalize(parsed.wishlist);
-        const result = await importCollection(
-          normalizedOwned.map((i) => i.title),
-          normalizedWishlist.map((i) => i.title)
-        );
-        setOwned(result.owned);
-        setWishlist(result.wishlist);
+        const performImport = async () => {
+          const result = await importCollection(
+            normalizedOwned.map((i) => i.title),
+            normalizedWishlist.map((i) => i.title)
+          );
+          setOwned(result.owned);
+          setWishlist(result.wishlist);
+        };
+        if (owned.length || wishlist.length) {
+          requestConfirm(
+            'Importing will replace your existing collection. Continue?',
+            performImport
+          );
+        } else {
+          await performImport();
+        }
       } catch (err) {
         alert('Invalid JSON file');
         console.error('Import failed', err);
       } finally {
-        e.target.value = '';
+        if (importRef.current) importRef.current.value = '';
       }
     };
     reader.readAsText(file);

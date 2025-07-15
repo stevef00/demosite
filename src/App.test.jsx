@@ -45,6 +45,17 @@ async function renderWithData(data) {
     if (url === '/api/move' || url.startsWith('/api/item/')) {
       return Promise.resolve({ ok: true, status: 204, json: () => Promise.resolve({}) });
     }
+    if (url === '/api/import') {
+      return Promise.resolve({
+        ok: true,
+        json: () => Promise.resolve({
+          owned: [
+            { id: 'x1', title: 'X' }
+          ],
+          wishlist: []
+        })
+      });
+    }
     return Promise.resolve({ ok: true, json: () => Promise.resolve({}) });
   });
   const utils = render(<App />);
@@ -264,4 +275,47 @@ test('shows user from Access cookie', () => {
   document.cookie = `CF_Authorization=header.${payload}.sig`;
   render(<App />);
   expect(screen.getByText(/Logged in as:/)).toHaveTextContent('test@example.com');
+});
+
+test('import shows confirmation when lists are not empty', async () => {
+  const { container } = await renderWithData({ owned: [{ id: '1', title: 'A' }], wishlist: [] });
+  const fileInput = container.querySelector('input[type="file"]');
+  global.FileReader = jest.fn(() => ({
+    onload: null,
+    readAsText() {
+      this.onload({ target: { result: JSON.stringify({ owned: ['X'], wishlist: [] }) } });
+    },
+  }));
+  const file = new File(['x'], 'data.json', { type: 'application/json' });
+  fireEvent.change(fileInput, { target: { files: [file] } });
+  expect(
+    screen.getByText('Importing will replace your existing collection. Continue?')
+  ).toBeInTheDocument();
+  expect(global.fetch).not.toHaveBeenCalledWith('/api/import', expect.anything());
+});
+
+test('confirmed import replaces collection', async () => {
+  const { container } = await renderWithData({ owned: [{ id: '1', title: 'A' }], wishlist: [] });
+  const fileInput = container.querySelector('input[type="file"]');
+  global.FileReader = jest.fn(() => ({
+    onload: null,
+    readAsText() {
+      this.onload({ target: { result: JSON.stringify({ owned: ['X'], wishlist: [] }) } });
+    },
+  }));
+  const file = new File(['x'], 'data.json', { type: 'application/json' });
+  fireEvent.change(fileInput, { target: { files: [file] } });
+  expect(
+    screen.getByText('Importing will replace your existing collection. Continue?')
+  ).toBeInTheDocument();
+  await act(async () => {
+    fireEvent.click(screen.getByText('Yes'));
+  });
+  await waitFor(() => {
+    const ownedTitles = Array.from(container.querySelectorAll('.owned-item span')).map((el) =>
+      el.textContent
+    );
+    expect(ownedTitles).toEqual(['X']);
+  });
+  expect(global.fetch).toHaveBeenCalledWith('/api/import', expect.anything());
 });

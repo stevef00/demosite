@@ -36,7 +36,8 @@ npm test
 
 - Manage owned and wishlist DVD lists.
 - Search, add, move and delete titles using the on-page controls.
-- Import/export collection data as JSON.
+- Import/export collection data as JSON. Import warns if it will replace
+  existing items.
 - Data is stored in a Cloudflare D1 database via the Worker.
 - Each movie is stored as an object with a unique `id` and `title`.
 
