@@ -11,6 +11,18 @@ import {
   importCollection,
 } from './storage';
 
+function normalize(list) {
+  return list.map((item) => {
+    if (typeof item === 'string') {
+      return { id: crypto.randomUUID(), title: item };
+    }
+    if (!item.id) {
+      return { id: crypto.randomUUID(), title: item.title };
+    }
+    return item;
+  });
+}
+
 export default function App() {
   const [owned, setOwned] = useState([]);
   const [wishlist, setWishlist] = useState([]);
@@ -145,10 +157,11 @@ export default function App() {
         if (!parsed || !Array.isArray(parsed.owned) || !Array.isArray(parsed.wishlist)) {
           throw new Error('Invalid format');
         }
-        const extract = (list) => list.map((i) => (typeof i === 'string' ? i : i.title));
+        const normalizedOwned = normalize(parsed.owned);
+        const normalizedWishlist = normalize(parsed.wishlist);
         const result = await importCollection(
-          extract(parsed.owned),
-          extract(parsed.wishlist)
+          normalizedOwned.map((i) => i.title),
+          normalizedWishlist.map((i) => i.title)
         );
         setOwned(result.owned);
         setWishlist(result.wishlist);
