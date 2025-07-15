@@ -40,6 +40,19 @@ npm test
 - Data is stored in a Cloudflare D1 database via the Worker.
 - Each movie is stored as an object with a unique `id` and `title`.
 
+## API
+
+### `POST /api/import`
+
+Replaces the authenticated user's collection. Send JSON of the form:
+
+```json
+{ "owned": ["Title"], "wishlist": ["Title"] }
+```
+
+The endpoint deletes any existing items for the user, adds the new ones and
+returns the saved lists with generated IDs.
+
 ## Managing Titles
 
 Each title has a **Move** button (➡️) and a **Delete** button (🗑️).

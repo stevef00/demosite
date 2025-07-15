@@ -1,4 +1,4 @@
-import { loadCollection, addItem, moveItem, deleteItem } from './storage';
+import { loadCollection, addItem, moveItem, deleteItem, importCollection } from './storage';
 
 beforeEach(() => {
   global.fetch = jest.fn();
@@ -50,4 +50,26 @@ test('deleteItem calls DELETE endpoint', async () => {
 
   expect(global.fetch).toHaveBeenCalledWith('/api/item/1', { method: 'DELETE' });
   expect(result.owned).toEqual([]);
+});
+
+test('importCollection posts to /api/import and sorts results', async () => {
+  global.fetch.mockResolvedValueOnce({
+    ok: true,
+    json: () =>
+      Promise.resolve({
+        owned: [
+          { id: '2', title: 'B' },
+          { id: '1', title: 'A' },
+        ],
+        wishlist: [],
+      }),
+  });
+
+  const result = await importCollection(['B', 'A'], []);
+
+  expect(global.fetch).toHaveBeenCalledWith(
+    '/api/import',
+    expect.objectContaining({ method: 'POST' })
+  );
+  expect(result.owned.map((i) => i.title)).toEqual(['A', 'B']);
 });

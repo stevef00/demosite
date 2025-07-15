@@ -83,3 +83,19 @@ export async function deleteItem(list, idx, owned, wishlist) {
   newWish = sortTitles(newWish);
   return { owned: newOwned, wishlist: newWish };
 }
+
+export async function importCollection(ownedTitles, wishlistTitles) {
+  const res = await fetch('/api/import', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ owned: ownedTitles, wishlist: wishlistTitles }),
+  });
+  if (!res.ok) {
+    throw new Error('Failed to import collection');
+  }
+  const data = await res.json();
+  return {
+    owned: sortTitles(data.owned || []),
+    wishlist: sortTitles(data.wishlist || []),
+  };
+}

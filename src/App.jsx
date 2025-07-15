@@ -2,12 +2,13 @@ import React, { useEffect, useRef, useState, useMemo } from 'react';
 import ListSection from './components/ListSection';
 import ConfirmDialog from './components/ConfirmDialog';
 import AddDialog from './components/AddDialog';
-import { sortTitles, getAccessUser } from './utils';
+import { getAccessUser } from './utils';
 import {
   loadCollection,
   addItem as storageAddItem,
   moveItem as storageMoveItem,
   deleteItem as storageDeleteItem,
+  importCollection,
 } from './storage';
 
 export default function App() {
@@ -138,20 +139,19 @@ export default function App() {
     const file = e.target.files[0];
     if (!file) return;
     const reader = new FileReader();
-    reader.onload = (ev) => {
+    reader.onload = async (ev) => {
       try {
         const parsed = JSON.parse(ev.target.result);
         if (!parsed || !Array.isArray(parsed.owned) || !Array.isArray(parsed.wishlist)) {
           throw new Error('Invalid format');
         }
-        const normalize = (list) =>
-          list.map((item) =>
-            typeof item === 'string' ? { id: crypto.randomUUID(), title: item } : item
-          );
-        const sortedO = sortTitles(normalize(parsed.owned));
-        const sortedW = sortTitles(normalize(parsed.wishlist));
-        setOwned(sortedO);
-        setWishlist(sortedW);
+        const extract = (list) => list.map((i) => (typeof i === 'string' ? i : i.title));
+        const result = await importCollection(
+          extract(parsed.owned),
+          extract(parsed.wishlist)
+        );
+        setOwned(result.owned);
+        setWishlist(result.wishlist);
       } catch (err) {
         alert('Invalid JSON file');
         console.error('Import failed', err);
