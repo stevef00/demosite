@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, act, waitFor } from '@testing-library/react';
 import App from './App';
 
 test('renders heading', () => {
@@ -23,35 +23,41 @@ function renderWithData(data) {
   return render(<App />);
 }
 
-test('move shows confirmation and moves item on confirm', () => {
+test('move shows confirmation and moves item on confirm', async () => {
   const { container } = renderWithData({ owned: [], wishlist: [{ id: '1', title: 'A' }] });
   fireEvent.click(screen.getByLabelText('Actions'));
   fireEvent.click(screen.getByText('Move'));
   expect(screen.getByText('Move this title to owned?')).toBeInTheDocument();
-  fireEvent.click(screen.getByText('Yes'));
+  await act(async () => {
+    fireEvent.click(screen.getByText('Yes'));
+  });
   const wishlistItems = container.querySelectorAll('.wishlist-item');
   expect(Array.from(wishlistItems).some((li) => li.textContent.includes('A'))).toBe(false);
   const ownedItems = container.querySelectorAll('.owned-item');
   expect(Array.from(ownedItems).some((li) => li.textContent.includes('A'))).toBe(true);
 });
 
-test('delete shows confirmation and removes item on confirm', () => {
+test('delete shows confirmation and removes item on confirm', async () => {
   const { container } = renderWithData({ owned: [{ id: '1', title: 'B' }], wishlist: [] });
   fireEvent.click(screen.getByLabelText('Actions'));
   fireEvent.click(screen.getByText('Delete'));
   expect(screen.getByText('Are you sure you want to delete this title?')).toBeInTheDocument();
-  fireEvent.click(screen.getByText('Yes'));
+  await act(async () => {
+    fireEvent.click(screen.getByText('Yes'));
+  });
   const ownedItems = container.querySelectorAll('.owned-item');
   expect(ownedItems.length).toBe(0);
 });
 
-test('moving owned item adds it once to wishlist', () => {
+test('moving owned item adds it once to wishlist', async () => {
   const { container } = renderWithData({ owned: [{ id: '1', title: 'C' }], wishlist: [] });
   const moveBtn = container.querySelector('.owned-item .item-menu-button');
   fireEvent.click(moveBtn);
   fireEvent.click(screen.getByText('Move'));
   expect(screen.getByText('Move this title back to wishlist?')).toBeInTheDocument();
-  fireEvent.click(screen.getByText('Yes'));
+  await act(async () => {
+    fireEvent.click(screen.getByText('Yes'));
+  });
   const wishlistItems = container.querySelectorAll('.wishlist-item');
   expect(wishlistItems.length).toBe(1);
   expect(wishlistItems[0].textContent).toContain('C');
@@ -66,24 +72,28 @@ test('adding to wishlist keeps items sorted', () => {
   expect(items).toEqual(['A', 'B']);
 });
 
-test('moving from wishlist sorts owned list', () => {
+test('moving from wishlist sorts owned list', async () => {
   const { container } = renderWithData({ owned: [{ id: '2', title: 'C' }], wishlist: [{ id: '1', title: 'A' }] });
   const menuBtn = container.querySelector('.wishlist-item .item-menu-button');
   fireEvent.click(menuBtn);
   fireEvent.click(screen.getByText('Move'));
   expect(screen.getByText('Move this title to owned?')).toBeInTheDocument();
-  fireEvent.click(screen.getByText('Yes'));
+  await act(async () => {
+    fireEvent.click(screen.getByText('Yes'));
+  });
   const ownedTitles = Array.from(container.querySelectorAll('.owned-item span')).map((el) => el.textContent);
   expect(ownedTitles).toEqual(['A', 'C']);
 });
 
-test('moving from owned keeps wishlist sorted', () => {
+test('moving from owned keeps wishlist sorted', async () => {
   const { container } = renderWithData({ owned: [{ id: '1', title: 'B' }], wishlist: [{ id: '2', title: 'A' }] });
   const moveBtn = container.querySelector('.owned-item .item-menu-button');
   fireEvent.click(moveBtn);
   fireEvent.click(screen.getByText('Move'));
   expect(screen.getByText('Move this title back to wishlist?')).toBeInTheDocument();
-  fireEvent.click(screen.getByText('Yes'));
+  await act(async () => {
+    fireEvent.click(screen.getByText('Yes'));
+  });
   const wishTitles = Array.from(container.querySelectorAll('.wishlist-item span')).map((el) => el.textContent);
   expect(wishTitles).toEqual(['A', 'B']);
 });
@@ -106,44 +116,50 @@ test('items in both lists get duplicate-item class', () => {
   expect(ownLi.classList.contains('duplicate-item')).toBe(true);
 });
 
-test('duplicate add shows confirmation and adds on confirm', () => {
+test('duplicate add shows confirmation and adds on confirm', async () => {
   const { container } = renderWithData({ owned: [{ id: '1', title: 'A' }], wishlist: [] });
   fireEvent.click(screen.getByLabelText('Add'));
   fireEvent.change(screen.getByPlaceholderText('Title'), { target: { value: 'a' } });
   fireEvent.click(screen.getByText('Add'));
   expect(screen.getByText('Title already exists—add anyway?')).toBeInTheDocument();
-  fireEvent.click(screen.getByText('Yes'));
+  await act(async () => {
+    fireEvent.click(screen.getByText('Yes'));
+  });
   const wishItems = container.querySelectorAll('.wishlist-item span');
   expect(wishItems.length).toBe(1);
   expect(wishItems[0].textContent).toBe('a');
 });
 
-test('duplicate add does not add when cancelled', () => {
+test('duplicate add does not add when cancelled', async () => {
   const { container } = renderWithData({ owned: [{ id: '1', title: 'A' }], wishlist: [] });
   fireEvent.click(screen.getByLabelText('Add'));
   fireEvent.change(screen.getByPlaceholderText('Title'), { target: { value: 'a' } });
   fireEvent.click(screen.getByText('Add'));
   expect(screen.getByText('Title already exists—add anyway?')).toBeInTheDocument();
-  fireEvent.click(screen.getByText('No'));
-  expect(screen.queryByText('Title already exists—add anyway?')).toBeNull();
+  await act(async () => {
+    fireEvent.click(screen.getByText('No'));
+  });
+  await waitFor(() => expect(screen.queryByText('Title already exists—add anyway?')).toBeNull());
   const wishItems = container.querySelectorAll('.wishlist-item span');
   expect(wishItems.length).toBe(0);
 });
 
-test('duplicate add highlights items on confirm', () => {
+test('duplicate add highlights items on confirm', async () => {
   const { container } = renderWithData({ owned: [{ id: '1', title: 'A' }], wishlist: [] });
   fireEvent.click(screen.getByLabelText('Add'));
   fireEvent.change(screen.getByPlaceholderText('Title'), { target: { value: 'a' } });
   fireEvent.click(screen.getByText('Add'));
   expect(screen.getByText('Title already exists—add anyway?')).toBeInTheDocument();
-  fireEvent.click(screen.getByText('Yes'));
+  await act(async () => {
+    fireEvent.click(screen.getByText('Yes'));
+  });
   const wishLi = container.querySelector('.wishlist-item');
   const ownLi = container.querySelector('.owned-item');
   expect(wishLi.classList.contains('duplicate-item')).toBe(true);
   expect(ownLi.classList.contains('duplicate-item')).toBe(true);
 });
 
-test('moving from wishlist keeps both lists sorted', () => {
+test('moving from wishlist keeps both lists sorted', async () => {
   const { container } = renderWithData({
     owned: [
       { id: '1', title: 'A' },
@@ -158,14 +174,16 @@ test('moving from wishlist keeps both lists sorted', () => {
   fireEvent.click(menuBtn);
   fireEvent.click(screen.getByText('Move'));
   expect(screen.getByText('Move this title to owned?')).toBeInTheDocument();
-  fireEvent.click(screen.getByText('Yes'));
+  await act(async () => {
+    fireEvent.click(screen.getByText('Yes'));
+  });
   const ownedTitles = Array.from(container.querySelectorAll('.owned-item span')).map((el) => el.textContent);
   const wishlistTitles = Array.from(container.querySelectorAll('.wishlist-item span')).map((el) => el.textContent);
   expect(ownedTitles).toEqual(['A', 'B', 'C']);
   expect(wishlistTitles).toEqual(['D']);
 });
 
-test('moving from owned keeps both lists sorted', () => {
+test('moving from owned keeps both lists sorted', async () => {
   const { container } = renderWithData({
     owned: [
       { id: '1', title: 'A' },
@@ -181,7 +199,9 @@ test('moving from owned keeps both lists sorted', () => {
   fireEvent.click(moveBtn);
   fireEvent.click(screen.getByText('Move'));
   expect(screen.getByText('Move this title back to wishlist?')).toBeInTheDocument();
-  fireEvent.click(screen.getByText('Yes'));
+  await act(async () => {
+    fireEvent.click(screen.getByText('Yes'));
+  });
   const ownedTitles = Array.from(container.querySelectorAll('.owned-item span')).map((el) => el.textContent);
   const wishlistTitles = Array.from(container.querySelectorAll('.wishlist-item span')).map((el) => el.textContent);
   expect(ownedTitles).toEqual(['A', 'E']);
