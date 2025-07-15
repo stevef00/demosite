@@ -37,7 +37,7 @@ npm test
 - Manage owned and wishlist DVD lists.
 - Search, add, move and delete titles using the on-page controls.
 - Import/export collection data as JSON.
-- Data persists in `localStorage`.
+- Data is stored in a Cloudflare D1 database via the Worker.
 - Each movie is stored as an object with a unique `id` and `title`.
 
 ## Managing Titles
@@ -56,3 +56,32 @@ list.
 - `src/` – React source files
 - `index.html` – entry point served by Vite
 
+
+## Deployment
+
+1. Create the D1 database (only once):
+
+   ```bash
+   wrangler d1 create dvd-db
+   ```
+
+   Copy the returned database ID into `wrangler.jsonc` under the `d1_databases` section.
+
+2. Create the `items` table in the database:
+
+   ```bash
+   wrangler d1 execute dvd-db --command "CREATE TABLE IF NOT EXISTS items (
+  id TEXT PRIMARY KEY,
+  title TEXT NOT NULL,
+  owned INTEGER NOT NULL,
+  user TEXT NOT NULL
+);"
+   ```
+
+   You can alternatively open the SQL shell with `wrangler d1 shell dvd-db` and run the same SQL.
+
+3. Publish the worker and site:
+
+   ```bash
+   wrangler publish
+   ```
