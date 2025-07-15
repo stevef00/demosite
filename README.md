@@ -4,7 +4,7 @@ This project has been converted to use the React framework with Vite.
 
 ## Development
 
-1. Install dependencies (requires Node.js):
+1. Install dependencies (requires Node.js 20 or later):
 
    ```bash
    npm install
