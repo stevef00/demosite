@@ -5,7 +5,6 @@ import AddDialog from './components/AddDialog';
 import { sortTitles, getAccessUser } from './utils';
 import {
   loadCollection,
-  saveCollection,
   addItem as storageAddItem,
   moveItem as storageMoveItem,
   deleteItem as storageDeleteItem,
@@ -36,8 +35,8 @@ export default function App() {
   }, []);
 
 
-  function loadData() {
-    const { owned: o, wishlist: w } = loadCollection();
+  async function loadData() {
+    const { owned: o, wishlist: w } = await loadCollection();
     setOwned(o);
     setWishlist(w);
   }
@@ -45,8 +44,8 @@ export default function App() {
   const requestConfirm = (message, action) => {
     setConfirmState({
       message,
-      onConfirm: () => {
-        action();
+      onConfirm: async () => {
+        await action();
         setConfirmState(null);
       },
     });
@@ -55,8 +54,8 @@ export default function App() {
   const cancelConfirm = () => setConfirmState(null);
 
   const moveFromWishlist = (idx) => {
-    requestConfirm('Move this title to owned?', () => {
-      const { owned: newO, wishlist: newW } = storageMoveItem(
+    requestConfirm('Move this title to owned?', async () => {
+      const { owned: newO, wishlist: newW } = await storageMoveItem(
         'wishlist',
         idx,
         owned,
@@ -68,8 +67,8 @@ export default function App() {
   };
 
   const deleteFromWishlist = (idx) => {
-    requestConfirm('Are you sure you want to delete this title?', () => {
-      const { owned: newO, wishlist: newW } = storageDeleteItem(
+    requestConfirm('Are you sure you want to delete this title?', async () => {
+      const { owned: newO, wishlist: newW } = await storageDeleteItem(
         'wishlist',
         idx,
         owned,
@@ -81,8 +80,8 @@ export default function App() {
   };
 
   const moveFromOwned = (idx) => {
-    requestConfirm('Move this title back to wishlist?', () => {
-      const { owned: newO, wishlist: newW } = storageMoveItem(
+    requestConfirm('Move this title back to wishlist?', async () => {
+      const { owned: newO, wishlist: newW } = await storageMoveItem(
         'owned',
         idx,
         owned,
@@ -94,8 +93,8 @@ export default function App() {
   };
 
   const deleteFromOwned = (idx) => {
-    requestConfirm('Are you sure you want to delete this title?', () => {
-      const { owned: newO, wishlist: newW } = storageDeleteItem(
+    requestConfirm('Are you sure you want to delete this title?', async () => {
+      const { owned: newO, wishlist: newW } = await storageDeleteItem(
         'owned',
         idx,
         owned,
@@ -106,8 +105,8 @@ export default function App() {
     });
   };
 
-  const addItem = (list, title) => {
-    const result = storageAddItem(list, title, owned, wishlist);
+  const addItem = async (list, title) => {
+    const result = await storageAddItem(list, title, owned, wishlist);
     const insert = () => {
       setOwned(result.owned);
       setWishlist(result.wishlist);
@@ -153,7 +152,6 @@ export default function App() {
         const sortedW = sortTitles(normalize(parsed.wishlist));
         setOwned(sortedO);
         setWishlist(sortedW);
-        saveCollection(sortedO, sortedW);
       } catch (err) {
         alert('Invalid JSON file');
         console.error('Import failed', err);
@@ -234,8 +232,8 @@ export default function App() {
       </footer>
       {addDialogOpen && (
         <AddDialog
-          onAdd={(list, title) => {
-            addItem(list, title);
+          onAdd={async (list, title) => {
+            await addItem(list, title);
             setAddDialogOpen(false);
           }}
           onCancel={() => setAddDialogOpen(false)}
